@@ -1,0 +1,49 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="DFBexu3Xw6t33hO9rRCM">
+    <mxGraphModel dx="1406" dy="619" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-6" edge="1" parent="1" source="e8I20tLTOXCX1J3kzPlW-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="e8I20tLTOXCX1J3kzPlW-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Insurance Claim Review" vertex="1">
+          <mxGeometry height="60" width="120" x="30" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-7" edge="1" parent="1" source="e8I20tLTOXCX1J3kzPlW-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="e8I20tLTOXCX1J3kzPlW-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;div&gt;Medical Records&lt;/div&gt;&lt;div&gt;(PDFs, Lab Reports,&lt;/div&gt;&lt;div&gt;Doctor Notes)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="200" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-8" edge="1" parent="1" source="e8I20tLTOXCX1J3kzPlW-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="e8I20tLTOXCX1J3kzPlW-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-13" edge="1" parent="1" source="e8I20tLTOXCX1J3kzPlW-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="e8I20tLTOXCX1J3kzPlW-12" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=#d5e8d4;strokeColor=#82b366;" value="Medical AI Reviewer Platform &lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="365" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-9" edge="1" parent="1" source="e8I20tLTOXCX1J3kzPlW-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="e8I20tLTOXCX1J3kzPlW-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-15" edge="1" parent="1" source="e8I20tLTOXCX1J3kzPlW-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="e8I20tLTOXCX1J3kzPlW-14" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Nurse Dashboard " vertex="1">
+          <mxGeometry height="60" width="120" x="520" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Final Decision " vertex="1">
+          <mxGeometry height="60" width="120" x="670" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Document Processing&amp;nbsp;&lt;br&gt;&amp;nbsp;↓&amp;nbsp;&lt;br&gt;&amp;nbsp;Evidence Extraction&amp;nbsp;&lt;br&gt;&amp;nbsp;↓&amp;nbsp;&lt;br&gt;Discrepancy Detection&amp;nbsp;&lt;br&gt;&amp;nbsp;↓&amp;nbsp;&lt;br&gt;&amp;nbsp;Summary Generation&amp;nbsp;&amp;nbsp;" vertex="1">
+          <mxGeometry height="140" width="235" x="308" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="e8I20tLTOXCX1J3kzPlW-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;div&gt;• Review Findings&lt;/div&gt;&lt;div&gt;• Validate Evidence&lt;/div&gt;&lt;div&gt;• Final Approval&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="160" x="500" y="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
