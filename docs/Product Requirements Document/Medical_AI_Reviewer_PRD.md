@@ -54,10 +54,8 @@ The goal is to shift the nurse’s role from reading everything manually to revi
 - No automated claim decisions — the system will not auto-deny, auto-adjust, or auto-recoup payments.
 - No replacement of nurse reviewers — final judgment remains with the human reviewer.
 - No diagnosis or medical advice — the system is only for claim review support, not clinical decision-making.
-- No pre-payment or prior-authorization workflows in v1.
 - Not a system of record — it reads records and claim data but does not replace EHR or claims systems.
 - No provider-side coding or billing actions.
-- Limited format support in v1 — the first version will support defined record and claim formats only.
 
 ## Feature Definition
 
