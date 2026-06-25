@@ -55,56 +55,44 @@ manual effort while improving review quality.
 
 ### 3. Feature Definition
 
-  Feature                 Description                                   Priority
-  ----------------------- --------------------------------------------- ----------
-  Document Upload         Upload PDF/DOC medical records                High
-  OCR Support             Extract scanned text                          High
-  Chunking & Embeddings   Prepare records for vector search             High
-  Vector Database         Store embeddings                              High
-  RAG Search              Retrieve relevant evidence                    High
-  AI Summarizer           Generate concise summaries                    High
-  Discrepancy Detection   Identify inconsistencies                      High
-  Evidence Highlighting   Link answers to document sections             High
-  Reviewer Chatbot        Interactive question answering                High
-  Claim Dashboard         Review status and metrics                     Medium
-  Feedback Loop           Human validation for continuous improvement   Medium
-  Audit Logs              Track AI decisions                            High
+| Feature | Description | Priority |
+|:---------|:------------|:--------:|
+| Document Upload | Upload PDF/DOC medical records | High |
+| OCR Support | Extract text from scanned documents | High |
+| Text Chunking | Split large records into chunks | High |
+| Embedding Generation | Convert chunks into vectors | High |
+| Vector Database | Store embeddings for retrieval | High |
+| RAG Retrieval | Retrieve relevant evidence | High |
+| AI Summarizer | Generate concise summaries | High |
+| Discrepancy Detection | Detect inconsistencies | High |
+| Evidence Highlighting | Highlight supporting text | High |
+| Reviewer Chatbot | Interactive question answering | High |
+| Dashboard | Review claim status | Medium |
+| Feedback Loop | Capture reviewer corrections | Medium |
+| Audit Logs | Track AI decisions | High |
 
 ### 4. Project Type
 
-**Primary Type:** AI Chatbot + Medical Document Summarizer + Clinical
-Evidence Recommender
+**Primary Type:**  Medical Document Summarizer + Clinical Evidence Recommender
 
-The solution combines: - Chatbot for reviewer interaction - Summarizer
-for lengthy medical records - Recommender for relevant evidence and
-discrepancy suggestions
+The solution combines: 
+- Summarizer for lengthy medical records.
+- Recommender for relevant evidence and discrepancy suggestions
 
 ### 5. Test Cases
 
-  ------------------------------------------------------------------------
-  ID       Test Scenario                  Expected Result
-  -------- ------------------------------ --------------------------------
-  TC-01    Upload valid PDF               File processed successfully
-
-  TC-02    Upload 1000+ page record       Processing completes without
-                                          failure
-
-  TC-03    Ask clinical question          Relevant evidence returned
-
-  TC-04    Generate summary               Accurate concise summary
-
-  TC-05    Detect discrepancy             Inconsistency highlighted
-
-  TC-06    Invalid file format            Validation error
-
-  TC-07    Missing patient data           Warning generated
-
-  TC-08    Large concurrent uploads       System remains responsive
-
-  TC-09    Unauthorized user              Access denied
-
-  TC-10    Reviewer feedback              Stored successfully
-  ------------------------------------------------------------------------
+| Test ID | Scenario | Expected Result |
+|:--------|:---------|:----------------|
+| TC-01 | Upload valid PDF | File processed |
+| TC-02 | Upload 1000+ page file | Successfully indexed |
+| TC-03 | Ask medical question | Correct evidence returned |
+| TC-04 | Generate summary | Summary produced |
+| TC-05 | Detect discrepancy | Highlight inconsistency |
+| TC-06 | Invalid file | Error message |
+| TC-07 | Missing patient data | Warning shown |
+| TC-08 | Multiple uploads | Stable performance |
+| TC-09 | Unauthorized login | Access denied |
+| TC-10 | Save feedback | Feedback stored |
 
 ### 6. Design Architecture
 
