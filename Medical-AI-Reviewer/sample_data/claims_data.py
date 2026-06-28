@@ -33,8 +33,8 @@ def load_claims():
 
         "Diagnosis":[
             "Pneumonia",
-            "Fracture",
             "Diabetes",
+            "Fracture",
             "Hypertension",
             "Asthma",
             "Stroke"
@@ -56,5 +56,14 @@ def load_claims():
             "Pending",
             "Completed",
             "Review"
+        ],
+
+        "AI Score":[
+            98,
+            95,
+            92,
+            97,
+            90,
+            99
         ]
     })

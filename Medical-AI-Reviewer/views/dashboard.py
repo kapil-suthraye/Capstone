@@ -1,6 +1,8 @@
 import streamlit as st
 import plotly.express as px
+from components.cards import metric_card
 from components.header import app_header
+from components.charts import claims_chart, status_chart
 
 from sample_data.dashboard_data import (
     get_recent_claims,
@@ -25,7 +27,19 @@ def dashboard_page():
 
     st.markdown("---")
 
-    left,right=st.columns([2,1])
+    left, right = st.columns([2,1])
+
+    with left:
+        st.plotly_chart(
+            claims_chart(get_claim_trend()),
+            use_container_width=True
+        )
+
+    with right:
+        st.plotly_chart(
+            status_chart(get_status_data()),
+            use_container_width=True
+        )
 
     trend=get_claim_trend()
 
@@ -54,7 +68,13 @@ def dashboard_page():
 
     st.markdown("---")
 
-    st.subheader("Recent Claims")
+    title, button = st.columns([6,1])
+
+    with title:
+        st.subheader("Recent Claims")
+
+    with button:
+        st.button("View All")
 
     st.dataframe(
         get_recent_claims(),
@@ -66,8 +86,24 @@ def dashboard_page():
 
     st.subheader("Notifications")
 
-    st.info("15 High Priority Claims require review.")
+    left, right = st.columns(2)
 
-    st.warning("2 Claims have missing discharge summaries.")
+    with left:
 
-    st.success("AI successfully processed 278 claims today.")
+        st.warning(
+            "15 High Priority Claims are waiting for review."
+        )
+
+        st.info(
+            "AI processed 278 claims successfully today."
+        )
+
+    with right:
+
+        st.error(
+            "2 Claims contain missing discharge summaries."
+        )
+
+        st.success(
+            "No critical system alerts detected."
+        )
