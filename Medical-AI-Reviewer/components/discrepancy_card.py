@@ -1,47 +1,55 @@
 import streamlit as st
 
+
 def discrepancy_card(item):
 
-    risk = item["Risk"]
+    with st.container(border=True):
 
-    if risk == "High":
-        st.error(f"🔴 {item['Title']}")
+        st.subheader(item["Category"])
 
-    elif risk == "Medium":
-        st.warning(f"🟡 {item['Title']}")
+        left, right = st.columns(2)
 
-    else:
-        st.success(f"🟢 {item['Title']}")
+        with left:
 
-    c1, c2 = st.columns(2)
+            st.write("### Insurance Claim")
 
-    with c1:
+            st.info(item["Claim"])
 
-        st.write("### Insurance Claim")
+        with right:
 
-        st.write(item["Claim"])
+            st.write("### Medical Record")
 
-    with c2:
+            st.info(item["Medical Record"])
 
-        st.write("### Medical Record")
+        c1, c2, c3 = st.columns(3)
 
-        st.write(item["Record"])
+        with c1:
 
-    c3, c4 = st.columns(2)
+            if item["Status"] == "Matched":
 
-    with c3:
+                st.success("Matched")
 
-        st.metric("Confidence", item["Confidence"])
+            else:
 
-    with c4:
+                st.error("Mismatch")
 
-        st.write("### AI Recommendation")
+        with c2:
 
-        st.write(item["Recommendation"])
+            if item["Severity"] == "High":
 
-    st.button(
-        "🔍 View Evidence",
-        key=item["Title"]
-    )
+                st.error("High")
 
-    st.divider()
+            elif item["Severity"] == "Medium":
+
+                st.warning("Medium")
+
+            else:
+
+                st.success("Low")
+
+        with c3:
+
+            st.metric(
+                "Confidence",
+                item["Confidence"]
+            )

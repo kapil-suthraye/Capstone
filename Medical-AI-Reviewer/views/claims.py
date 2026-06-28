@@ -1,62 +1,78 @@
 import streamlit as st
-import pandas as pd
 
 from sample_data.claims_data import load_claims
-from components.claim_card import claim_card
+
 
 def claims_page():
 
     st.title("📋 Claims Queue")
 
-    st.caption("Review incoming claims")
+    st.caption("Review incoming medical insurance claims")
 
     df = load_claims()
 
-    st.markdown("---")
-
-    c1,c2,c3=st.columns([3,1,1])
-
-    with c1:
-        search=st.text_input(
-            "Search Claim / Patient"
-        )
-
-    with c2:
-        priority=st.selectbox(
-            "Priority",
-            ["All","High","Medium","Low"]
-        )
-
-    with c3:
-        status=st.selectbox(
-            "Status",
-            ["All","Pending","Review","Completed"]
-        )
-
-    filtered=df.copy()
+    search = st.text_input(
+        "Search Claim / Patient"
+    )
 
     if search:
 
-        filtered=filtered[
-            filtered["Patient"].str.contains(search,case=False)
+        df = df[
+            df["Patient"].str.contains(
+                search,
+                case=False
+            )
             |
-            filtered["Claim ID"].str.contains(search,case=False)
+            df["Claim ID"].str.contains(
+                search,
+                case=False
+            )
         ]
 
-    if priority!="All":
+    st.divider()
 
-        filtered=filtered[
-            filtered["Priority"]==priority
-        ]
+    for _, row in df.iterrows():
 
-    if status!="All":
+        with st.container(border=True):
 
-        filtered=filtered[
-            filtered["Status"]==status
-        ]
+            left, right = st.columns([4, 1])
 
-    st.markdown("---")
+            with left:
 
-    for _,row in filtered.iterrows():
+                st.subheader(row["Claim ID"])
 
-        claim_card(row)
+                st.write(f"👤 {row['Patient']}")
+
+                st.write(f"🏥 {row['Hospital']}")
+
+                st.write(f"🩺 {row['Diagnosis']}")
+
+                st.write(
+                    f"Priority : {row['Priority']}"
+                )
+
+                st.write(
+                    f"Status : {row['Status']}"
+                )
+
+            with right:
+
+                st.metric(
+                    "AI Score",
+                    f"{row['AI Score']}%"
+                )
+
+                if st.button(
+                    "Review",
+                    key=row["Claim ID"]
+                ):
+
+                    st.session_state.selected_claim = row["Claim ID"]
+
+                    st.session_state.current_page = "Claim Details"
+
+                    st.success(
+                        f"Selected {row['Claim ID']}"
+                    )
+
+                    st.rerun()

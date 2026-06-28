@@ -7,7 +7,8 @@
 }
 
 section[data-testid="stSidebar"] {
-    background: #FFFFFF;
+    /* background: #FFFFFF; */
+    background-color: #ffe0e6;
     border-right: 1px solid #E5E7EB;
 }
 
@@ -60,6 +61,7 @@ button{
 
     border-radius:12px;
 
+
 }
 
 .stExpander{
@@ -71,6 +73,7 @@ button{
 .stAlert{
 
     border-radius:12px;
+    margin-top: 30px;
 
 }
 

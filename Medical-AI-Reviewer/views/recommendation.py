@@ -1,45 +1,64 @@
 import streamlit as st
-import pandas as pd
 
 from components.header import app_header
 
-from sample_data.recommendation_data import *
+from sample_data.recommendation_data import (
+    get_recommendation,
+    review_summary
+)
+
 
 def recommendation_page():
 
     app_header()
 
-    st.subheader("📋 Final AI Recommendation")
+    claim = st.session_state.selected_claim
 
-    rec = get_recommendation()
+    data = get_recommendation(claim)
 
-    c1,c2,c3 = st.columns(3)
+    patient = data["patient"]
 
-    with c1:
+    st.subheader(
+        f"📋 Final Recommendation - {claim}"
+    )
 
-        st.warning(rec["Recommendation"])
+    st.divider()
 
-    with c2:
+    col1, col2 = st.columns([2,1])
+
+    with col1:
+
+        st.write(f"### 👤 {patient['Patient']}")
+
+        st.write(f"Hospital : {patient['Hospital']}")
+
+        st.write(f"Diagnosis : {patient['Diagnosis']}")
+
+    with col2:
 
         st.metric(
             "Confidence",
-            rec["Confidence"]
+            data["confidence"]
         )
-
-    with c3:
 
         st.metric(
             "Risk Score",
-            rec["Risk"]
+            data["risk"]
         )
+
+    st.divider()
+
+    st.warning(
+        data["recommendation"]
+    )
 
     st.divider()
 
     st.subheader("Review Summary")
 
-    for item,status in get_summary():
+    for item, status in review_summary():
 
-        if status=="Verified":
+        if status:
 
             st.success(f"✔ {item}")
 
@@ -52,9 +71,13 @@ def recommendation_page():
     st.subheader("Reviewer Notes")
 
     notes = st.text_area(
-        "",
-        height=150,
-        placeholder="Enter review comments..."
+
+        "Enter Notes",
+
+        height=120,
+
+        placeholder="Add review comments..."
+
     )
 
     st.divider()
@@ -74,76 +97,41 @@ def recommendation_page():
             "Reject Claim"
 
         ]
+
     )
 
     st.divider()
 
-    report = pd.DataFrame({
+    left, right = st.columns(2)
 
-        "Section":[
+    with left:
 
-            "Recommendation",
+        if st.button(
 
-            "Confidence",
+            "⬅ Back",
 
-            "Risk Score",
+            use_container_width=True
 
-            "Decision"
+        ):
 
-        ],
+            st.session_state.current_page = "Discrepancy"
 
-        "Value":[
+            st.rerun()
 
-            rec["Recommendation"],
+    with right:
 
-            rec["Confidence"],
+        if st.button(
 
-            rec["Risk"],
+            "📄 Generate Report",
 
-            decision
+            use_container_width=True
 
-        ]
+        ):
 
-    })
+            st.session_state.final_decision = decision
 
-    csv = report.to_csv(index=False).encode()
+            st.session_state.reviewer_notes = notes
 
-    c1,c2 = st.columns(2)
+            st.session_state.current_page = "Reports"
 
-    with c1:
-
-        st.download_button(
-
-            "📄 Download CSV",
-
-            csv,
-
-            "Claim_Report.csv"
-
-        )
-
-    with c2:
-
-        st.button("📑 Generate PDF")
-
-    st.divider()
-
-    st.subheader("Audit Trail")
-
-    st.markdown("""
-
-✅ AI Review Completed
-
-⬇
-
-👩 Nurse Validation
-
-⬇
-
-📄 Report Generated
-
-⬇
-
-✔ Claim Closed
-
-""")
+            st.rerun()

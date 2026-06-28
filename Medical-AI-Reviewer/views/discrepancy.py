@@ -10,49 +10,109 @@ def discrepancy_page():
 
     app_header()
 
-    st.subheader("⚠ AI Discrepancy Detection")
+    claim = st.session_state.selected_claim
 
-    st.metric(
-        "Overall AI Risk Score",
-        "92%",
-        "High Risk"
+    st.subheader(
+        f"⚠ Discrepancy Detection - {claim}"
     )
 
-    st.progress(92)
-
     st.divider()
 
-    st.subheader("Detected Discrepancies")
+    discrepancies = get_discrepancies(claim)
 
-    data = get_discrepancies()
+    total = len(discrepancies)
 
-    for item in data:
+    mismatch = len(
 
-        discrepancy_card(item)
+        [
 
-    st.divider()
+            d for d in discrepancies
 
-    high = len([d for d in data if d["Risk"] == "High"])
-    medium = len([d for d in data if d["Risk"] == "Medium"])
-    low = len([d for d in data if d["Risk"] == "Low"])
+            if d["Status"] == "Mismatch"
+
+        ]
+
+    )
+
+    matched = total - mismatch
 
     c1, c2, c3 = st.columns(3)
 
-    c1.metric("🔴 High", high)
-    c2.metric("🟡 Medium", medium)
-    c3.metric("🟢 Low", low)
+    with c1:
+
+        st.metric(
+            "Total Checks",
+            total
+        )
+
+    with c2:
+
+        st.metric(
+            "Matched",
+            matched
+        )
+
+    with c3:
+
+        st.metric(
+            "Mismatches",
+            mismatch
+        )
 
     st.divider()
 
-    st.subheader("Reviewer Decision")
+    st.subheader("Comparison")
 
-    b1, b2, b3 = st.columns(3)
+    for item in discrepancies:
 
-    with b1:
-        st.button("✅ Approve")
+        discrepancy_card(item)
 
-    with b2:
-        st.button("📤 Escalate")
+        st.divider()
 
-    with b3:
-        st.button("❌ Reject")
+    st.subheader("Overall Assessment")
+
+    st.warning("""
+
+Two discrepancies require manual validation.
+
+MRI billing could not be verified.
+
+Length of stay differs by one day.
+
+Recommendation:
+
+Proceed for Manual Review.
+
+""")
+
+    st.divider()
+
+    left, right = st.columns(2)
+
+    with left:
+
+        if st.button(
+
+            "⬅ Evidence",
+
+            use_container_width=True
+
+        ):
+
+            st.session_state.current_page = "Evidence"
+
+            st.rerun()
+
+    with right:
+
+        if st.button(
+
+            "Continue",
+
+            use_container_width=True
+
+        ):
+
+            st.session_state.current_page = "Recommendation"
+
+            st.rerun()

@@ -1,33 +1,54 @@
-def get_discrepancies():
+from sample_data.claims_data import get_claim
+
+
+def get_discrepancies(claim_id):
+
+    patient = get_claim(claim_id)
+
+    diagnosis = patient["Diagnosis"]
 
     return [
 
         {
-            "Title":"MRI Procedure",
+            "Category": "Diagnosis",
 
-            "Claim":"MRI billed",
+            "Claim": diagnosis,
 
-            "Record":"No MRI found",
+            "Medical Record": diagnosis,
 
-            "Risk":"High",
+            "Status": "Matched",
 
-            "Confidence":"98%",
+            "Severity": "Low",
 
-            "Recommendation":"Manual Review"
+            "Confidence": "99%"
         },
 
         {
-            "Title":"Length of Stay",
+            "Category": "Length of Stay",
 
-            "Claim":"5 Days",
+            "Claim": "5 Days",
 
-            "Record":"4 Days",
+            "Medical Record": "4 Days",
 
-            "Risk":"Medium",
+            "Status": "Mismatch",
 
-            "Confidence":"95%",
+            "Severity": "Medium",
 
-            "Recommendation":"Verify Billing"
+            "Confidence": "96%"
+        },
+
+        {
+            "Category": "MRI Procedure",
+
+            "Claim": "MRI Billed",
+
+            "Medical Record": "No MRI Found",
+
+            "Status": "Mismatch",
+
+            "Severity": "High",
+
+            "Confidence": "98%"
         }
 
     ]

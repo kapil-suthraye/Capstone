@@ -1,10 +1,11 @@
 import streamlit as st
 
+
 def evidence_card(item):
 
     with st.container(border=True):
 
-        left,right=st.columns([4,1])
+        left, right = st.columns([4,1])
 
         with left:
 
@@ -19,9 +20,4 @@ def evidence_card(item):
             st.metric(
                 "Confidence",
                 item["Confidence"]
-            )
-
-            st.button(
-                "View PDF",
-                key=item["Category"]
             )

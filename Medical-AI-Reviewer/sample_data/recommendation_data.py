@@ -1,26 +1,57 @@
-def get_recommendation():
+from sample_data.claims_data import get_claim
+
+
+def get_recommendation(claim_id):
+
+    patient = get_claim(claim_id)
+
+    if patient["Priority"] == "High":
+
+        recommendation = "Requires Manual Review"
+
+        confidence = "96%"
+
+        risk = "92%"
+
+    elif patient["Priority"] == "Medium":
+
+        recommendation = "Review Recommended"
+
+        confidence = "94%"
+
+        risk = "70%"
+
+    else:
+
+        recommendation = "Suitable for Approval"
+
+        confidence = "98%"
+
+        risk = "25%"
 
     return {
 
-        "Recommendation":"Requires Manual Review",
+        "patient": patient,
 
-        "Confidence":"96%",
+        "recommendation": recommendation,
 
-        "Risk":"92%"
+        "confidence": confidence,
+
+        "risk": risk
 
     }
 
 
-def get_summary():
+def review_summary():
 
     return [
 
-        ("Diagnosis","Verified"),
+        ("Diagnosis", True),
 
-        ("Medication","Verified"),
+        ("Clinical Notes", True),
 
-        ("Length of Stay","Verified"),
+        ("Medication", True),
 
-        ("MRI Procedure","Missing")
+        ("Billing Validation", False)
 
     ]

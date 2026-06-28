@@ -1,38 +1,43 @@
-import pandas as pd
-
-def get_patient():
-
-    return {
-
-        "Claim ID":"CLM1001",
-
-        "Patient":"John Doe",
-
-        "Age":45,
-
-        "Gender":"Male",
-
-        "Hospital":"City Hospital",
-
-        "Diagnosis":"Pneumonia",
-
-        "Admission":"12-Jun-2026",
-
-        "Discharge":"16-Jun-2026"
-
-    }
+from sample_data.claims_data import get_claim
 
 
-def get_documents():
+DOCUMENTS = {
 
-    return [
-
+    "CLM1001": [
         "Discharge Summary.pdf",
-
         "Physician Notes.pdf",
-
         "Lab Reports.pdf",
-
         "Billing Statement.pdf"
+    ],
 
+    "CLM1002": [
+        "Diabetes Assessment.pdf",
+        "Medication Chart.pdf",
+        "Blood Report.pdf",
+        "Invoice.pdf"
+    ],
+
+    "CLM1003": [
+        "Orthopedic Notes.pdf",
+        "X-Ray Report.pdf",
+        "Discharge Summary.pdf"
+    ],
+
+    "CLM1004": [
+        "Admission Notes.pdf",
+        "Blood Pressure Chart.pdf",
+        "ECG Report.pdf",
+        "Discharge Summary.pdf"
     ]
+
+}
+
+
+def get_patient(claim_id):
+
+    return get_claim(claim_id)
+
+
+def get_documents(claim_id):
+
+    return DOCUMENTS.get(claim_id, [])

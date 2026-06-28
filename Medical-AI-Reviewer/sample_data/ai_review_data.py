@@ -1,62 +1,40 @@
-def get_summary():
-
-    return """
-Patient admitted with Pneumonia.
-
-Treatment included:
-
-• IV Antibiotics
-
-• Chest X-Ray
-
-• Blood Tests
-
-Patient responded well to treatment and was discharged in stable condition.
-"""
+from sample_data.claims_data import get_claim
 
 
-def get_evidence():
+def get_ai_review(claim_id):
 
-    return [
+    patient = get_claim(claim_id)
 
-        {
-            "title":"Diagnosis",
-            "page":12,
-            "text":"Pneumonia confirmed by Chest X-Ray.",
-            "confidence":"98%"
-        },
+    diagnosis = patient["Diagnosis"]
 
-        {
-            "title":"Medication",
-            "page":34,
-            "text":"IV Ceftriaxone administered.",
-            "confidence":"97%"
-        },
+    return {
 
-        {
-            "title":"Procedure",
-            "page":48,
-            "text":"Chest X-Ray performed.",
-            "confidence":"99%"
-        }
+        "summary": f"""
+Patient {patient['Patient']} was admitted to
+{patient['Hospital']}.
 
-    ]
+Primary Diagnosis:
+{diagnosis}
 
+Treatment completed successfully.
 
-def get_discrepancies():
+Patient discharged in stable condition.
 
-    return [
+No life-threatening complications observed.
+""",
 
-        {
-            "Claim":"MRI Scan",
-            "Record":"No MRI found",
-            "Severity":"High"
-        },
+        "confidence": patient["AI Score"],
 
-        {
-            "Claim":"Length of Stay = 5 Days",
-            "Record":"Actual Stay = 4 Days",
-            "Severity":"Medium"
-        }
+        "findings": [
 
-    ]
+            "Diagnosis verified",
+
+            "Admission & discharge dates verified",
+
+            "Medication records available",
+
+            "Billing documents available"
+
+        ]
+
+    }

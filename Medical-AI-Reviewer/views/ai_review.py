@@ -1,72 +1,75 @@
 import streamlit as st
 
 from components.header import app_header
-from components.progress import ai_processing
+from components.processing import ai_processing
 
-from sample_data.ai_review_data import *
+from sample_data.ai_review_data import get_ai_review
+
 
 def ai_review_page():
 
     app_header()
 
-    st.subheader("🤖 AI Medical Review")
+    claim = st.session_state.selected_claim
+
+    review = get_ai_review(claim)
+
+    st.subheader(f"🤖 AI Review - {claim}")
+
+    st.divider()
 
     ai_processing()
 
     st.divider()
 
-    st.subheader("📝 AI Generated Summary")
+    st.subheader("Clinical Summary")
 
-    st.success(get_summary())
+    st.success(review["summary"])
 
-    st.divider()
+    st.metric(
 
-    st.subheader("📄 Supporting Evidence")
+        "AI Confidence",
 
-    for evidence in get_evidence():
+        f"{review['confidence']}%"
 
-        with st.expander(
-            f"{evidence['title']}  |  Page {evidence['page']}"
-        ):
-
-            st.write(evidence["text"])
-
-            st.metric(
-                "Confidence",
-                evidence["confidence"]
-            )
+    )
 
     st.divider()
 
-    st.subheader("⚠ Detected Discrepancies")
+    st.subheader("Key Findings")
 
-    for d in get_discrepancies():
+    for item in review["findings"]:
 
-        st.error(
-            f"""
-Claim
-
-{d['Claim']}
-
-Medical Record
-
-{d['Record']}
-
-Severity
-
-{d['Severity']}
-"""
-        )
+        st.success(f"✔ {item}")
 
     st.divider()
 
-    c1,c2,c3=st.columns(3)
+    c1, c2 = st.columns(2)
 
     with c1:
-        st.button("🔍 View Evidence")
+
+        if st.button(
+
+            "⬅ Claim Details",
+
+            use_container_width=True
+
+        ):
+
+            st.session_state.current_page = "Claim Details"
+
+            st.rerun()
 
     with c2:
-        st.button("📄 Generate Report")
 
-    with c3:
-        st.button("➡ Continue")
+        if st.button(
+
+            "📄 View Evidence",
+
+            use_container_width=True
+
+        ):
+
+            st.session_state.current_page = "Evidence"
+
+            st.rerun()

@@ -1,48 +1,63 @@
-def get_evidence():
+from sample_data.claims_data import get_claim
+
+
+def get_evidence(claim_id):
+
+    patient = get_claim(claim_id)
+
+    diagnosis = patient["Diagnosis"]
 
     return [
 
         {
-            "Category":"Diagnosis",
-
-            "Page":"12",
-
-            "Confidence":"98%",
-
-            "Evidence":"Chest X-Ray confirms Pneumonia."
+            "Category": "Diagnosis",
+            "Page": 12,
+            "Confidence": "98%",
+            "Evidence":
+                f"Primary diagnosis confirmed as {diagnosis}."
         },
 
         {
-            "Category":"Medication",
-
-            "Page":"34",
-
-            "Confidence":"97%",
-
-            "Evidence":"IV Ceftriaxone administered."
+            "Category": "Medication",
+            "Page": 25,
+            "Confidence": "96%",
+            "Evidence":
+                "Medication administration record verified."
         },
 
         {
-            "Category":"Lab Result",
+            "Category": "Laboratory",
+            "Page": 42,
+            "Confidence": "99%",
+            "Evidence":
+                "Lab investigations support the diagnosis."
+        },
 
-            "Page":"51",
-
-            "Confidence":"99%",
-
-            "Evidence":"Elevated White Blood Cell Count."
+        {
+            "Category": "Discharge Summary",
+            "Page": 58,
+            "Confidence": "97%",
+            "Evidence":
+                "Patient discharged in stable condition."
         }
 
     ]
 
 
-def ai_explanation():
+def get_ai_explanation(claim_id):
 
-    return """
-MRI was billed in the insurance claim.
+    patient = get_claim(claim_id)
 
-The AI searched all uploaded medical records.
+    return f"""
+The AI reviewed all uploaded medical documents for
+{patient['Patient']}.
 
-No MRI order, report or imaging evidence was found.
+Clinical evidence consistently supports the diagnosis.
 
-Therefore the claim was flagged for manual review.
+However, billing records contain one or more items that
+require manual validation.
+
+Recommendation:
+
+Proceed to Discrepancy Review.
 """

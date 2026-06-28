@@ -1,50 +1,72 @@
 import streamlit as st
 
-from sample_data.patient_data import get_patient
-from sample_data.patient_data import get_documents
-
 from components.header import app_header
 from components.timeline import treatment_timeline
+
+from sample_data.patient_data import (
+    get_patient,
+    get_documents
+)
 
 
 def claim_details_page():
 
     app_header()
 
-    st.subheader("Claim Details")
+    claim_id = st.session_state.selected_claim
 
-    patient=get_patient()
+    patient = get_patient(claim_id)
 
-    left,right=st.columns([2,1])
+    st.subheader(f"📄 Claim Details - {claim_id}")
+
+    st.divider()
+
+    left, right = st.columns([2,1])
 
     with left:
 
-        st.markdown("### 👤 Patient Information")
+        st.markdown("## 👤 Patient Information")
 
-        st.write(f"**Claim ID:** {patient['Claim ID']}")
         st.write(f"**Patient:** {patient['Patient']}")
+
         st.write(f"**Age:** {patient['Age']}")
+
         st.write(f"**Gender:** {patient['Gender']}")
+
         st.write(f"**Hospital:** {patient['Hospital']}")
+
         st.write(f"**Diagnosis:** {patient['Diagnosis']}")
+
         st.write(
-            f"**Stay:** {patient['Admission']} → {patient['Discharge']}"
+            f"**Admission:** {patient['Admission']}"
+        )
+
+        st.write(
+            f"**Discharge:** {patient['Discharge']}"
         )
 
     with right:
 
-        st.info("Priority : HIGH")
-
         st.metric(
             "AI Confidence",
-            "98%"
+            f"{patient['AI Score']}%"
+        )
+
+        st.info(
+            f"Priority : {patient['Priority']}"
+        )
+
+        st.success(
+            f"Status : {patient['Status']}"
         )
 
     st.divider()
 
-    st.markdown("### 📂 Uploaded Documents")
+    st.markdown("## 📂 Uploaded Documents")
 
-    for doc in get_documents():
+    docs = get_documents(claim_id)
+
+    for doc in docs:
 
         st.success(f"✔ {doc}")
 
@@ -54,6 +76,26 @@ def claim_details_page():
 
     st.divider()
 
-    if st.button("🤖 Analyze with AI"):
+    col1,col2 = st.columns(2)
 
-        st.success("Opening AI Review...")
+    with col1:
+
+        if st.button(
+            "⬅ Back to Claims",
+            use_container_width=True
+        ):
+
+            st.session_state.current_page = "Claims"
+
+            st.rerun()
+
+    with col2:
+
+        if st.button(
+            "🤖 Analyze with AI",
+            use_container_width=True
+        ):
+
+            st.session_state.current_page = "AI Review"
+
+            st.rerun()

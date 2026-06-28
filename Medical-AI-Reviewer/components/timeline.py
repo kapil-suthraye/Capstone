@@ -1,25 +1,26 @@
 import streamlit as st
 
+
 def treatment_timeline():
 
-    st.markdown("### 🕒 Treatment Timeline")
+    st.subheader("🕒 Treatment Timeline")
 
     st.markdown("""
-✅ Admission
+🟢 Admission
 
 ⬇
 
-🩺 Diagnosis Confirmed
+🩺 Diagnosis
 
 ⬇
 
-💊 IV Antibiotics
+💊 Treatment
 
 ⬇
 
-🧪 Blood Tests
+🧪 Lab Investigation
 
 ⬇
 
-📄 Discharge
+🏠 Discharge
 """)
