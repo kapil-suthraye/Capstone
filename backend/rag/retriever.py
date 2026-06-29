@@ -1,7 +1,7 @@
 from langchain_community.vectorstores import FAISS
 
-from config import FAISS_FOLDER
-from ingestion.embeddings import EmbeddingModel
+from backend.config import FAISS_FOLDER
+from backend.ingestion.embeddings import EmbeddingModel
 
 
 class MedicalRetriever:
@@ -36,12 +36,11 @@ class MedicalRetriever:
 
     ):
 
-        results = self.vector_db.similarity_search(
+        results = self.vector_db.similarity_search_with_score(
 
             query,
 
             k=k
 
         )
-
-        return results
+        return results 

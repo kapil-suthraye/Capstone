@@ -1,4 +1,4 @@
-from rag.retriever import MedicalRetriever
+from backend.rag.retriever import MedicalRetriever
 
 
 print("=" * 60)
@@ -21,18 +21,17 @@ print("Retrieved Chunks")
 
 print("=" * 60)
 
-for i, doc in enumerate(results, start=1):
+for i, (doc, score) in enumerate(results, start=1):
 
-    print()
-
+    print("\n" + "=" * 60)
     print(f"Chunk {i}")
+    print("=" * 60)
 
-    print("-" * 50)
+    print(f"Similarity Score : {score:.4f}")
 
-    print(doc.page_content[:500])
-
-    print()
-
+    print("\nMetadata")
     print(doc.metadata)
 
-    print()
+    print("\nContent")
+    print("-" * 60)
+    print(doc.page_content[:500])
