@@ -83,14 +83,19 @@ Nurse Validation Dashboard
 
 ## Technology Stack (Planned)
 
-- Python
-- LangGraph
-- FAISS
-- Hugging Face Embeddings
-- Large Language Models (LLMs)
-- Streamlit
-- RAGAS
-- LangSmith
+| Layer            | Technology               | Why                     |
+| ---------------- | ------------------------ | ----------------------- |
+| Frontend         | Streamlit                | Fast prototype UI       |
+| Backend          | Python                   | AI ecosystem support    |
+| Document Parsing | PyPDF / Unstructured     | Read medical documents  |
+| Embeddings       | HuggingFace BGE          | Convert text to vectors |
+| Vector Store     | FAISS                    | Fast semantic search    |
+| AI Model         | GPT-4o / Claude / Llama  | Evidence analysis       |
+| RAG Framework    | LangChain                | Orchestration           |
+| Storage          | Local Files / PostgreSQL | Metadata storage        |
+| Observability    | LangSmith                | Trace AI workflow       |
+| Evaluation       | RAGAS                    | Measure answer quality  |
+
 
 ---
 

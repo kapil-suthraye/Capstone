@@ -1,0 +1,112 @@
+.main {
+    background-color: #F8FAFC;
+}
+
+.block-container {
+    padding: 1.5rem 2rem;
+}
+
+section[data-testid="stSidebar"] {
+    /* background: #FFFFFF; */
+    background-color: #ffe0e6;
+    border-right: 1px solid #E5E7EB;
+}
+
+div[data-testid="metric-container"] {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0px 2px 8px rgba(0,0,0,.05);
+}
+
+.stButton>button {
+    width: 100%;
+    border-radius: 10px;
+    height: 42px;
+    border: none;
+    background: #2563EB;
+    color: white;
+    font-weight: 600;
+}
+
+.stButton>button:hover {
+    background: #1D4ED8;
+}
+
+h1, h2, h3 {
+    color: #1F2937;
+}
+
+hr{
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+button{
+    font-weight:600;
+}
+
+.stMetric{
+    text-align:center;
+}
+
+.stSuccess{
+
+    border-radius:12px;
+
+}
+
+.stInfo{
+
+    border-radius:12px;
+
+
+}
+
+.stExpander{
+
+    border-radius:12px;
+
+}
+
+.stAlert{
+
+    border-radius:12px;
+    margin-top: 30px;
+
+}
+
+div[data-testid="stProgressBar"]{
+
+    height:12px;
+
+}
+
+div[data-testid="stChatMessage"]{
+
+    border-radius:12px;
+
+    padding:15px;
+
+}
+
+div[data-testid="stVerticalBlock"]{
+
+    gap:0.7rem;
+
+}
+
+.stButton>button {
+
+    font-weight:600;
+
+    border-radius:10px;
+
+}
+
+div[data-testid="metric-container"]{
+
+    border-left:4px solid #2563EB;
+
+}
