@@ -27,20 +27,38 @@ class MedicalRetriever:
         print("Retriever Ready.")
 
     def search(
-
         self,
-
-        query,
-
-        k=5
-
+        query: str,
+        k: int = 5,
+        with_score: bool = True
     ):
+        """
+        Search the FAISS vector database.
 
-        results = self.vector_db.similarity_search_with_score(
+        Parameters
+        ----------
+        query : str
+            User question
 
+        k : int
+            Number of chunks to retrieve
+
+        with_score : bool
+            Return similarity scores along with documents.
+
+        Returns
+        -------
+        List[Document] or List[(Document, score)]
+        """
+
+        if with_score:
+
+            return self.vector_db.similarity_search_with_score(
+                query,
+                k=k
+            )
+
+        return self.vector_db.similarity_search(
             query,
-
             k=k
-
         )
-        return results 
