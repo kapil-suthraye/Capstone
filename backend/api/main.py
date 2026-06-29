@@ -4,20 +4,22 @@ app = FastAPI(
 
     title="Medical AI Reviewer",
 
-    description="Backend API for Medical Claim Review",
+    description="Enterprise Medical Claim Review API",
 
-    version="1.0"
+    version="1.0.0"
 
 )
 
 
 @app.get("/")
-def home():
+def health():
 
     return {
 
-        "status": "Backend Running",
+        "status": "running",
 
-        "message": "Medical AI Reviewer API"
+        "application": "Medical AI Reviewer",
+
+        "version": "1.0.0"
 
     }

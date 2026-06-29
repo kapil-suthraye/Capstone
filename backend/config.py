@@ -1,91 +1,82 @@
-from dotenv import load_dotenv
-import os
+"""
+Central configuration for Medical AI Reviewer.
+"""
 
-# Load variables from .env
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# -------------------------------------------------
+# Load Environment Variables
+# -------------------------------------------------
+
 load_dotenv()
 
-
-# ------------------------------
-# OpenAI
-# ------------------------------
+# -------------------------------------------------
+# API Keys
+# -------------------------------------------------
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-
-# ------------------------------
-# LangSmith
-# ------------------------------
-
 LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY")
 
-LANGCHAIN_PROJECT = os.getenv(
-    "LANGCHAIN_PROJECT"
-)
+LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT")
 
 LANGCHAIN_TRACING_V2 = os.getenv(
     "LANGCHAIN_TRACING_V2"
 )
 
-
-# ==========================================================
+# -------------------------------------------------
 # Project Paths
-# ==========================================================
+# -------------------------------------------------
 
-import os
+BASE_DIR = Path(__file__).resolve().parent
 
-BASE_DIR = os.path.dirname(__file__)
+PROJECT_ROOT = BASE_DIR.parent
 
-# Project Root
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(BASE_DIR, "..")
+# -------------------------------------------------
+# Data
+# -------------------------------------------------
+
+DATA_FOLDER = PROJECT_ROOT / "data"
+
+MEDICAL_RECORDS_FOLDER = (
+    DATA_FOLDER / "medical_records"
 )
 
-# Shared Data Folder
-DATA_FOLDER = os.path.join(
-    PROJECT_ROOT,
-    "data"
+GUIDELINES_FOLDER = (
+    DATA_FOLDER / "jobaids"
 )
 
-# Medical Records
-MEDICAL_RECORDS_FOLDER = os.path.join(
-    DATA_FOLDER,
-    "medical_records"
+GROUND_TRUTH_FOLDER = (
+    DATA_FOLDER / "gt"
 )
 
-# Nurse Guidelines
-GUIDELINES_FOLDER = os.path.join(
-    DATA_FOLDER,
-    "jobaids"
-)
-
-# Ground Truth
-GROUND_TRUTH_FOLDER = os.path.join(
-    DATA_FOLDER,
-    "gt"
-)
-
+# -------------------------------------------------
 # Vector DB
-VECTOR_DB_FOLDER = os.path.join(
-    PROJECT_ROOT,
-    "vector_db"
+# -------------------------------------------------
+
+VECTOR_DB_FOLDER = (
+    PROJECT_ROOT / "vector_db"
 )
 
-MEDICAL_VECTOR_DB = os.path.join(
-    VECTOR_DB_FOLDER,
-    "medical_index"
+MEDICAL_VECTOR_DB = (
+    VECTOR_DB_FOLDER / "medical_index"
 )
 
-GUIDELINE_VECTOR_DB = os.path.join(
-    VECTOR_DB_FOLDER,
-    "guideline_index"
+CACHE_FOLDER = (
+    VECTOR_DB_FOLDER / "cache"
 )
 
-CACHE_FOLDER = os.path.join(
-    VECTOR_DB_FOLDER,
-    "cache"
+VECTOR_DB_FOLDER.mkdir(
+    exist_ok=True
 )
 
-# Create folders if they don't exist
-os.makedirs(MEDICAL_VECTOR_DB, exist_ok=True)
-os.makedirs(GUIDELINE_VECTOR_DB, exist_ok=True)
-os.makedirs(CACHE_FOLDER, exist_ok=True)
+MEDICAL_VECTOR_DB.mkdir(
+    exist_ok=True
+)
+
+CACHE_FOLDER.mkdir(
+    exist_ok=True
+)

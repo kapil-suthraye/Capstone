@@ -1,34 +1,44 @@
+from langchain_community.vectorstores import FAISS
+
 from backend.config import (
     MEDICAL_RECORDS_FOLDER,
     MEDICAL_VECTOR_DB
 )
 
-from backend.ingestion.loader import PDFLoader
-from backend.ingestion.splitter import DocumentSplitter
-from backend.ingestion.embeddings import EmbeddingModel
+from backend.ingestion.pdf_loader import (
+    MedicalPDFLoader
+)
 
-from langchain_community.vectorstores import FAISS
+from backend.ingestion.chunker import (
+    MedicalChunker
+)
+
+from backend.ingestion.embeddings import (
+    EmbeddingModel
+)
 
 
 class MedicalVectorBuilder:
 
     def build(self):
 
-        print("Loading Medical PDFs...")
+        print("=" * 60)
+        print("Building Medical Vector Database")
+        print("=" * 60)
 
-        loader = PDFLoader(
+        loader = MedicalPDFLoader(
             MEDICAL_RECORDS_FOLDER
         )
 
-        docs = loader.load_documents()
+        docs = loader.load()
 
-        splitter = DocumentSplitter()
+        chunker = MedicalChunker()
 
-        chunks = splitter.split(docs)
+        chunks = chunker.split(docs)
 
         embeddings = EmbeddingModel().get_model()
 
-        db = FAISS.from_documents(
+        vector_db = FAISS.from_documents(
 
             chunks,
 
@@ -36,8 +46,10 @@ class MedicalVectorBuilder:
 
         )
 
-        db.save_local(
-            MEDICAL_VECTOR_DB
+        vector_db.save_local(
+            str(MEDICAL_VECTOR_DB)
         )
 
-        print("Medical Vector DB Created")
+        print()
+
+        print("Medical Vector DB Created Successfully")
