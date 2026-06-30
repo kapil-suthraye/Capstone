@@ -1,21 +1,16 @@
-from langchain_community.vectorstores import FAISS
+from pinecone import Pinecone
+
+from langchain_pinecone import PineconeVectorStore
 
 from backend.config import (
     MEDICAL_RECORDS_FOLDER,
-    MEDICAL_VECTOR_DB
+    PINECONE_API_KEY,
+    PINECONE_INDEX
 )
 
-from backend.ingestion.pdf_loader import (
-    MedicalPDFLoader
-)
-
-from backend.ingestion.chunker import (
-    MedicalChunker
-)
-
-from backend.ingestion.embeddings import (
-    EmbeddingModel
-)
+from backend.ingestion.pdf_loader import MedicalPDFLoader
+from backend.ingestion.chunker import MedicalChunker
+from backend.ingestion.embeddings import EmbeddingModel
 
 
 class MedicalVectorBuilder:
@@ -23,7 +18,7 @@ class MedicalVectorBuilder:
     def build(self):
 
         print("=" * 60)
-        print("Building Medical Vector Database")
+        print("Building Pinecone Vector Database")
         print("=" * 60)
 
         loader = MedicalPDFLoader(
@@ -38,18 +33,20 @@ class MedicalVectorBuilder:
 
         embeddings = EmbeddingModel().get_model()
 
-        vector_db = FAISS.from_documents(
-
-            chunks,
-
-            embeddings
-
+        pc = Pinecone(
+            api_key=PINECONE_API_KEY
         )
 
-        vector_db.save_local(
-            str(MEDICAL_VECTOR_DB)
+        PineconeVectorStore.from_documents(
+
+            documents=chunks,
+
+            embedding=embeddings,
+
+            index_name=PINECONE_INDEX
+
         )
 
         print()
 
-        print("Medical Vector DB Created Successfully")
+        print("Upload Completed")

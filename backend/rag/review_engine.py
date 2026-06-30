@@ -55,7 +55,9 @@ class ReviewEngine:
 
         documents = self.retriever.search(
 
-            request.pdf_name,
+            query="medical review",
+
+            pdf_name=request.pdf_name,
 
             k=8
 

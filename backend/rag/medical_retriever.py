@@ -1,8 +1,10 @@
-from langchain_community.vectorstores import FAISS
-
-from backend.config import MEDICAL_VECTOR_DB
+from langchain_pinecone import PineconeVectorStore
 
 from backend.ingestion.embeddings import EmbeddingModel
+
+from backend.config import (
+    PINECONE_INDEX
+)
 
 
 class MedicalRetriever:
@@ -11,27 +13,29 @@ class MedicalRetriever:
 
         embeddings = EmbeddingModel().get_model()
 
-        print("Loading Medical Vector DB...")
+        self.vectorstore = PineconeVectorStore(
 
-        self.db = FAISS.load_local(
+            index_name=PINECONE_INDEX,
 
-            str(MEDICAL_VECTOR_DB),
-
-            embeddings,
-
-            allow_dangerous_deserialization=True
+            embedding=embeddings
 
         )
 
     def search(
+
         self,
+
+        query,
+
         pdf_name,
+
         k=8
+
     ):
 
-        return self.db.similarity_search(
+        return self.vectorstore.similarity_search(
 
-            query="medical review",
+            query=query,
 
             k=k,
 

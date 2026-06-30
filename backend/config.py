@@ -57,26 +57,22 @@ GROUND_TRUTH_FOLDER = (
 # Vector DB
 # -------------------------------------------------
 
-VECTOR_DB_FOLDER = (
-    PROJECT_ROOT / "vector_db"
-)
 
-MEDICAL_VECTOR_DB = (
-    VECTOR_DB_FOLDER / "medical_index"
-)
+import os
+from pathlib import Path
 
-CACHE_FOLDER = (
-    VECTOR_DB_FOLDER / "cache"
-)
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
-VECTOR_DB_FOLDER.mkdir(
-    exist_ok=True
-)
+DATA_DIR = ROOT_DIR / "data"
 
-MEDICAL_VECTOR_DB.mkdir(
-    exist_ok=True
-)
+MEDICAL_RECORDS_FOLDER = DATA_DIR / "medical_records"
 
-CACHE_FOLDER.mkdir(
-    exist_ok=True
-)
+GUIDELINES_FOLDER = DATA_DIR / "jobaids"
+
+GROUND_TRUTH_FOLDER = DATA_DIR / "gt"
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+
+PINECONE_INDEX = os.getenv("PINECONE_INDEX")
