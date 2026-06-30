@@ -7,3 +7,5 @@ PAGE_ICON = "🩺"
 LAYOUT = "wide"
 
 SIDEBAR_STATE = "expanded"
+
+BACKEND_URL = "http://localhost:8000"

@@ -3,7 +3,8 @@ import streamlit as st
 from components.header import app_header
 from components.processing import ai_processing
 
-from sample_data.ai_review_data import get_ai_review
+# from sample_data.ai_review_data import get_ai_review
+from services.api import review_claim
 
 
 def ai_review_page():
@@ -12,7 +13,27 @@ def ai_review_page():
 
     claim = st.session_state.selected_claim
 
-    review = get_ai_review(claim)
+    if not st.session_state.review_loaded:
+
+        payload = {
+
+            "claim_id": claim,
+
+            "document_path": f"documents/{claim}.pdf"
+
+        }
+
+        with st.spinner("Running Medical AI Review..."):
+
+            review = review_claim(payload)
+
+            st.session_state.review_result = review
+
+            st.session_state.review_loaded = True
+
+    else:
+
+        review = st.session_state.review_result
 
     st.subheader(f"🤖 AI Review - {claim}")
 
@@ -30,46 +51,56 @@ def ai_review_page():
 
         "AI Confidence",
 
-        f"{review['confidence']}%"
+        f"{review['confidence']*100:.0f}%"
 
     )
 
     st.divider()
 
-    st.subheader("Key Findings")
+    st.subheader("Evidence")
 
-    for item in review["findings"]:
+    for item in review['evidence']:
 
-        st.success(f"✔ {item}")
+        with st.container():
 
-    st.divider()
+            st.markdown(f"### 📌 {item['finding']}")
 
-    c1, c2 = st.columns(2)
+            col1,col2 = st.columns(2)
 
-    with c1:
+            with col1:
+                st.info(f"Source : {item['source']}")
 
-        if st.button(
+            with col2:
+                st.info(f"Page : {item['page']}")
 
-            "⬅ Claim Details",
+            st.divider()
 
-            use_container_width=True
+    # c1, c2 = st.columns(2)
 
-        ):
+    # with c1:
 
-            st.session_state.current_page = "Claim Details"
+    #     if st.button(
 
-            st.rerun()
+    #         "⬅ Claim Details",
 
-    with c2:
+    #         use_container_width=True
 
-        if st.button(
+    #     ):
 
-            "📄 View Evidence",
+    #         st.session_state.current_page = "Claim Details"
 
-            use_container_width=True
+    #         st.rerun()
 
-        ):
+    # with c2:
 
-            st.session_state.current_page = "Evidence"
+    #     if st.button(
 
-            st.rerun()
+    #         "📄 View Evidence",
+
+    #         use_container_width=True
+
+    #     ):
+
+    #         st.session_state.current_page = "Evidence"
+
+    #         st.rerun()

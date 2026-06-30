@@ -2,11 +2,6 @@ import streamlit as st
 
 from components.header import app_header
 
-from sample_data.recommendation_data import (
-    get_recommendation,
-    review_summary
-)
-
 
 def recommendation_page():
 
@@ -14,124 +9,128 @@ def recommendation_page():
 
     claim = st.session_state.selected_claim
 
-    data = get_recommendation(claim)
+    review = st.session_state.review_result
 
-    patient = data["patient"]
+    st.subheader("AI Recommendation")
 
-    st.subheader(
-        f"📋 Final Recommendation - {claim}"
-    )
+    st.success(review["recommendation"])
 
-    st.divider()
+    # patient = data["patient"]
 
-    col1, col2 = st.columns([2,1])
+    # st.subheader(
+    #     f"📋 Final Recommendation - {claim}"
+    # )
 
-    with col1:
+    # st.divider()
 
-        st.write(f"### 👤 {patient['Patient']}")
+    # col1, col2 = st.columns([2,1])
 
-        st.write(f"Hospital : {patient['Hospital']}")
+    # with col1:
 
-        st.write(f"Diagnosis : {patient['Diagnosis']}")
+    #     st.write(f"### 👤 {patient['Patient']}")
 
-    with col2:
+    #     st.write(f"Hospital : {patient['Hospital']}")
 
-        st.metric(
-            "Confidence",
-            data["confidence"]
-        )
+    #     st.write(f"Diagnosis : {patient['Diagnosis']}")
 
-        st.metric(
-            "Risk Score",
-            data["risk"]
-        )
+    # with col2:
 
-    st.divider()
+    #     st.metric(
+    #         "Confidence",
+    #         data["confidence"]
+    #     )
 
-    st.warning(
-        data["recommendation"]
-    )
+    #     st.metric(
+    #         "Risk Score",
+    #         data["risk"]
+    #     )
 
-    st.divider()
+    # st.divider()
 
-    st.subheader("Review Summary")
+    # st.warning(
+    #     data["recommendation"]
+    # )
 
-    for item, status in review_summary():
+    # st.divider()
 
-        if status:
+    # st.subheader("Review Summary")
 
-            st.success(f"✔ {item}")
+    # for item, status in review_summary():
 
-        else:
+    #     if status:
 
-            st.error(f"✖ {item}")
+    #         st.success(f"✔ {item}")
 
-    st.divider()
+    #     else:
 
-    st.subheader("Reviewer Notes")
+    #         st.error(f"✖ {item}")
 
-    notes = st.text_area(
+    # st.divider()
 
-        "Enter Notes",
+    # st.subheader("Reviewer Notes")
 
-        height=120,
+    # notes = st.text_area(
 
-        placeholder="Add review comments..."
+    #     "Enter Notes",
 
-    )
+    #     height=120,
 
-    st.divider()
+    #     placeholder="Add review comments..."
 
-    st.subheader("Reviewer Decision")
+    # )
 
-    decision = st.radio(
+    # st.divider()
 
-        "",
+    # st.subheader("Reviewer Decision")
 
-        [
+    # decision = st.radio(
 
-            "Approve Claim",
+    #     "",
 
-            "Escalate for Physician Review",
+    #     [
 
-            "Reject Claim"
+    #         "Approve Claim",
 
-        ]
+    #         "Escalate for Physician Review",
 
-    )
+    #         "Reject Claim"
 
-    st.divider()
+    #     ]
 
-    left, right = st.columns(2)
+    # )
 
-    with left:
+    # st.divider()
 
-        if st.button(
+    # left, right = st.columns(2)
 
-            "⬅ Back",
+    # with left:
 
-            use_container_width=True
+    #     if st.button(
 
-        ):
+    #         "⬅ Back",
 
-            st.session_state.current_page = "Discrepancy"
+    #         use_container_width=True
 
-            st.rerun()
+    #     ):
 
-    with right:
+    #         st.session_state.current_page = "Discrepancy"
 
-        if st.button(
+    #         st.rerun()
 
-            "📄 Generate Report",
+    # with right:
 
-            use_container_width=True
+    #     if st.button(
 
-        ):
+    #         "📄 Generate Report",
 
-            st.session_state.final_decision = decision
+    #         use_container_width=True
 
-            st.session_state.reviewer_notes = notes
+    #     ):
 
-            st.session_state.current_page = "Reports"
+    #         st.session_state.final_decision = decision
 
-            st.rerun()
+    #         st.session_state.reviewer_notes = notes
+
+    #         st.session_state.current_page = "Reports"
+
+    #         st.rerun()

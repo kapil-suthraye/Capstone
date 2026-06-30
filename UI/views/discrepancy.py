@@ -10,109 +10,120 @@ def discrepancy_page():
 
     app_header()
 
-    claim = st.session_state.selected_claim
+    review = st.session_state.review_result
 
-    st.subheader(
-        f"⚠ Discrepancy Detection - {claim}"
-    )
+    missing = review["missing_documentation"]
 
-    st.divider()
+    st.subheader("Missing Documentation")
 
-    discrepancies = get_discrepancies(claim)
+    for item in missing:
 
-    total = len(discrepancies)
+        st.warning(item)
 
-    mismatch = len(
+        
+#     claim = st.session_state.selected_claim
 
-        [
+#     st.subheader(
+#         f"⚠ Discrepancy Detection - {claim}"
+#     )
 
-            d for d in discrepancies
+#     st.divider()
 
-            if d["Status"] == "Mismatch"
+#     discrepancies = get_discrepancies(claim)
 
-        ]
+#     total = len(discrepancies)
 
-    )
+#     mismatch = len(
 
-    matched = total - mismatch
+#         [
 
-    c1, c2, c3 = st.columns(3)
+#             d for d in discrepancies
 
-    with c1:
+#             if d["Status"] == "Mismatch"
 
-        st.metric(
-            "Total Checks",
-            total
-        )
+#         ]
 
-    with c2:
+#     )
 
-        st.metric(
-            "Matched",
-            matched
-        )
+#     matched = total - mismatch
 
-    with c3:
+#     c1, c2, c3 = st.columns(3)
 
-        st.metric(
-            "Mismatches",
-            mismatch
-        )
+#     with c1:
 
-    st.divider()
+#         st.metric(
+#             "Total Checks",
+#             total
+#         )
 
-    st.subheader("Comparison")
+#     with c2:
 
-    for item in discrepancies:
+#         st.metric(
+#             "Matched",
+#             matched
+#         )
 
-        discrepancy_card(item)
+#     with c3:
 
-        st.divider()
+#         st.metric(
+#             "Mismatches",
+#             mismatch
+#         )
 
-    st.subheader("Overall Assessment")
+#     st.divider()
 
-    st.warning("""
+#     st.subheader("Comparison")
 
-Two discrepancies require manual validation.
+#     for item in discrepancies:
 
-MRI billing could not be verified.
+#         discrepancy_card(item)
 
-Length of stay differs by one day.
+#         st.divider()
 
-Recommendation:
+#     st.subheader("Overall Assessment")
 
-Proceed for Manual Review.
+#     st.warning("""
 
-""")
+# Two discrepancies require manual validation.
 
-    st.divider()
+# MRI billing could not be verified.
 
-    left, right = st.columns(2)
+# Length of stay differs by one day.
 
-    with left:
+# Recommendation:
 
-        if st.button(
+# Proceed for Manual Review.
 
-            "⬅ Evidence",
+# """)
 
-            use_container_width=True
+#     st.divider()
 
-        ):
+#     left, right = st.columns(2)
 
-            st.session_state.current_page = "Evidence"
+#     with left:
 
-            st.rerun()
+#         if st.button(
 
-    with right:
+#             "⬅ Evidence",
 
-        if st.button(
+#             use_container_width=True
 
-            "Continue",
+#         ):
 
-            use_container_width=True
+#             st.session_state.current_page = "Evidence"
 
-        ):
+#             st.rerun()
 
-            st.session_state.current_page = "Recommendation"
+#     with right:
 
-            st.rerun()
+#         if st.button(
+
+#             "Continue",
+
+#             use_container_width=True
+
+#         ):
+
+#             st.session_state.current_page = "Recommendation"
+
+#             st.rerun()

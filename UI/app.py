@@ -50,6 +50,12 @@ if "current_page" not in st.session_state:
 if "reviewer_name" not in st.session_state:
     st.session_state.reviewer_name = "Amy Wilson"
 
+if "review_result" not in st.session_state:
+    st.session_state.review_result = None
+
+if "review_loaded" not in st.session_state:
+    st.session_state.review_loaded = False
+
 # ======================================================
 # LOGIN
 # ======================================================

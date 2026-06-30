@@ -12,6 +12,22 @@ class EvidenceItem(BaseModel):
     page: int
 
 
+class TimelineEvent(BaseModel):
+
+    title: str
+
+    description: str
+
+    status: str
+
+
+class ProcessingStep(BaseModel):
+
+    step: str
+
+    status: str
+
+
 class ReviewResponse(BaseModel):
 
     claim_id: str
@@ -27,3 +43,7 @@ class ReviewResponse(BaseModel):
     recommendation: str
 
     confidence: float
+
+    processing_steps: List[ProcessingStep] = []
+
+    timeline: List[TimelineEvent] = []

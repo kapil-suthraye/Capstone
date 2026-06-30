@@ -3,99 +3,101 @@ import streamlit as st
 from components.header import app_header
 from components.timeline import treatment_timeline
 
-from sample_data.patient_data import (
-    get_patient,
-    get_documents
-)
+# from sample_data.patient_data import (
+#     get_patient,
+#     get_documents
+# )
 
 
 def claim_details_page():
 
     app_header()
 
-    claim_id = st.session_state.selected_claim
+    review = st.session_state.review_result
 
-    patient = get_patient(claim_id)
+    # claim_id = st.session_state.selected_claim
 
-    st.subheader(f"📄 Claim Details - {claim_id}")
+    # patient = get_patient(claim_id)
 
-    st.divider()
+    # st.subheader(f"📄 Claim Details - {claim_id}")
 
-    left, right = st.columns([2,1])
+    # st.divider()
 
-    with left:
+    # left, right = st.columns([2,1])
 
-        st.markdown("## 👤 Patient Information")
+    # with left:
 
-        st.write(f"**Patient:** {patient['Patient']}")
+    #     st.markdown("## 👤 Patient Information")
 
-        st.write(f"**Age:** {patient['Age']}")
+    #     st.write(f"**Patient:** {patient['Patient']}")
 
-        st.write(f"**Gender:** {patient['Gender']}")
+    #     st.write(f"**Age:** {patient['Age']}")
 
-        st.write(f"**Hospital:** {patient['Hospital']}")
+    #     st.write(f"**Gender:** {patient['Gender']}")
 
-        st.write(f"**Diagnosis:** {patient['Diagnosis']}")
+    #     st.write(f"**Hospital:** {patient['Hospital']}")
 
-        st.write(
-            f"**Admission:** {patient['Admission']}"
-        )
+    #     st.write(f"**Diagnosis:** {patient['Diagnosis']}")
 
-        st.write(
-            f"**Discharge:** {patient['Discharge']}"
-        )
+    #     st.write(
+    #         f"**Admission:** {patient['Admission']}"
+    #     )
 
-    with right:
+    #     st.write(
+    #         f"**Discharge:** {patient['Discharge']}"
+    #     )
 
-        st.metric(
-            "AI Confidence",
-            f"{patient['AI Score']}%"
-        )
+    # with right:
 
-        st.info(
-            f"Priority : {patient['Priority']}"
-        )
+    #     st.metric(
+    #         "AI Confidence",
+    #         f"{patient['AI Score']}%"
+    #     )
 
-        st.success(
-            f"Status : {patient['Status']}"
-        )
+    #     st.info(
+    #         f"Priority : {patient['Priority']}"
+    #     )
 
-    st.divider()
+    #     st.success(
+    #         f"Status : {patient['Status']}"
+    #     )
 
-    st.markdown("## 📂 Uploaded Documents")
+    # st.divider()
 
-    docs = get_documents(claim_id)
+    # st.markdown("## 📂 Uploaded Documents")
 
-    for doc in docs:
+    # docs = get_documents(claim_id)
 
-        st.success(f"✔ {doc}")
+    # for doc in docs:
 
-    st.divider()
+    #     st.success(f"✔ {doc}")
 
-    treatment_timeline()
+    # st.divider()
 
-    st.divider()
+    # treatment_timeline()
 
-    col1,col2 = st.columns(2)
+    # st.divider()
 
-    with col1:
+    # col1,col2 = st.columns(2)
 
-        if st.button(
-            "⬅ Back to Claims",
-            use_container_width=True
-        ):
+    # with col1:
 
-            st.session_state.current_page = "Claims"
+    #     if st.button(
+    #         "⬅ Back to Claims",
+    #         use_container_width=True
+    #     ):
 
-            st.rerun()
+    #         st.session_state.current_page = "Claims"
 
-    with col2:
+    #         st.rerun()
 
-        if st.button(
-            "🤖 Analyze with AI",
-            use_container_width=True
-        ):
+    # with col2:
 
-            st.session_state.current_page = "AI Review"
+    #     if st.button(
+    #         "🤖 Analyze with AI",
+    #         use_container_width=True
+    #     ):
 
-            st.rerun()
+    #         st.session_state.current_page = "AI Review"
+
+    #         st.rerun()

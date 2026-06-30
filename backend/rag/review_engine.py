@@ -181,10 +181,97 @@ class ReviewEngine:
 
             confidence=review_json[
                 "confidence"
+            ],
+
+            processing_steps=[
+
+                {
+
+                    "step": "Retrieve Medical Records",
+
+                    "status": "Completed"
+
+                },
+
+                {
+
+                    "step": "Detect Diagnosis",
+
+                    "status": "Completed"
+
+                },
+
+                {
+
+                    "step": "Load Clinical Guideline",
+
+                    "status": "Completed"
+
+                },
+
+                {
+
+                    "step": "Build Medical Context",
+
+                    "status": "Completed"
+
+                },
+
+                {
+
+                    "step": "Generate AI Review",
+
+                    "status": "Completed"
+
+                }
+
+            ],
+
+            timeline=[
+
+                {
+
+                    "title": "Medical Review Started",
+
+                    "description": "Retriever initialized",
+
+                    "status": "Completed"
+
+                },
+
+                {
+
+                    "title": "Diagnosis Detected",
+
+                    "description": review_json["diagnosis"],
+
+                    "status": "Completed"
+
+                },
+
+                {
+
+                    "title": "Evidence Retrieved",
+
+                    "description": f"{len(evidence)} supporting findings located",
+
+                    "status": "Completed"
+
+                },
+
+                {
+
+                    "title": "Recommendation Generated",
+
+                    "description": review_json["recommendation"],
+
+                    "status": "Completed"
+
+                }
+
             ]
 
         )
-
         print("Medical Review Completed.")
 
         return review
