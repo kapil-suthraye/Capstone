@@ -30,9 +30,12 @@ class GuidelineLoader:
 
         if sheet is None:
 
-            raise ValueError(
-                f"No worksheet found for '{diagnosis}'."
-            )
+            print("No diagnosis-specific worksheet found.")
+            return None 
+
+            # raise ValueError(
+            #     f"No worksheet found for '{diagnosis}'."
+            # )
 
         return self.loader.load_sheet(
             sheet

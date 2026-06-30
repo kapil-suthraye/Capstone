@@ -19,6 +19,13 @@ class PromptBuilder:
             guideline_df
         )
 
+        if guideline_df is None :
+            guideline_text = """
+General Medical Review
+
+Review the patient's medical necessity based on the available documentation.
+"""
+
         prompt = f"""
 ====================================================
 MEDICAL AI REVIEWER
