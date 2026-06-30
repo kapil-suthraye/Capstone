@@ -57,24 +57,30 @@ Review ONLY the supplied medical evidence.
 Compare the patient documentation with the
 clinical review guideline.
 
-Generate:
+Generate a review in the following JSON format.
 
-1. Clinical Summary
+{{
+  "diagnosis": "",
+  "summary": "",
+  "evidence": [
+    {{
+      "finding": "",
+      "source": "",
+      "page": 0
+    }}
+  ],
+  "missing_documentation": [],
+  "recommendation": "",
+  "confidence": 0.0
+}}
 
-2. Supporting Evidence
+Rules:
 
-3. Missing Documentation
-
-4. Clinical Recommendation
-
-5. Confidence Score
-
-Never hallucinate.
-
-If information is unavailable,
-state "Not Available".
-
-Return JSON.
+1. Return ONLY JSON.
+2. Do NOT use markdown.
+3. Do NOT wrap JSON inside ``` blocks.
+4. If information is unavailable, use "Not Available".
+5. Evidence must always include source PDF and page number.
 """
 
         return prompt
