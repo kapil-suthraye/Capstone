@@ -1,43 +1,31 @@
 import { Injectable, inject } from '@angular/core';
 
+import { Observable } from 'rxjs';
+
 import { ApiService } from './api';
 
 import { EvaluationResult } from '../models/evaluation-result';
 
-import { Observable } from 'rxjs';
-
 @Injectable({
-
-providedIn:'root'
-
+  providedIn: 'root'
 })
+export class ReviewService {
 
-export class ReviewService{
+  private api = inject(ApiService);
 
-private api=inject(ApiService);
+  evaluate(
+    namespace: string,
+    promptId: string
+  ): Observable<EvaluationResult> {
 
-evaluate(
+    return this.api.post<EvaluationResult>(
+      'evaluate',
+      {
+        namespace: namespace,
+        prompt_id: promptId
+      }
+    );
 
-namespace:string,
-
-promptId:string
-
-):Observable<EvaluationResult>{
-
-return this.api.post<EvaluationResult>(
-
-'evaluate',
-
-{
-
-namespace,
-
-prompt_id:promptId
-
-}
-
-);
-
-}
+  }
 
 }

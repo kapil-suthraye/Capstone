@@ -24,6 +24,8 @@ import { NursePrompt } from '../../core/models/prompt';
 
 import { EvaluationResult } from '../../core/models/evaluation-result';
 
+import { SessionService } from '../../core/services/session';
+
 @Component({
 
 selector:'app-review',
@@ -56,6 +58,10 @@ PromptService
 
 );
 
+private session = inject(
+    SessionService
+);
+
 private reviewService=inject(
 
 ReviewService
@@ -70,13 +76,7 @@ selectedPage=
 
 signal(1);
 
-pdfPath=
-
-signal(
-
-'assets/sample.pdf'
-
-);
+pdfPath = signal('');
 
 selectedPrompt=
 
@@ -89,7 +89,7 @@ signal<EvaluationResult|null>(null);
 constructor(){
 
 this.loadPrompts();
-
+this.pdfPath.set(this.session.pdfPath);
 }
 
 loadPrompts(){
@@ -119,34 +119,42 @@ openPdf(page:number){
 }
 
 selectPrompt(
+    prompt: NursePrompt
+): void {
 
-prompt:NursePrompt
+    console.log(
+    'Namespace =',
+    this.session.namespace
+    );
+    this.selectedPrompt.set(prompt);
 
-){
+    console.log('Selected Prompt', prompt.prompt_id);
 
-this.selectedPrompt.set(prompt);
+console.log('Namespace', this.session.namespace);
 
-this.reviewService
+    this.reviewService.evaluate(
 
-.evaluate(
+        this.session.namespace,
 
-'patient001',
+        prompt.prompt_id
 
-prompt.prompt_id
+    ).subscribe({
 
-)
+        next: result => {
 
-.subscribe({
+            console.log(result);
 
-next:r=>{
+            this.result.set(result);
 
-this.result.set(r);
+        },
 
-},
+        error: error => {
 
-error:console.error
+            console.error(error);
 
-});
+        }
+
+    });
 
 }
 

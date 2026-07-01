@@ -2,6 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 
 import { UploadService } from '../../core/services/upload';
 
+import { SessionService } from '../../core/services/session';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-upload',
 
@@ -13,7 +16,17 @@ import { UploadService } from '../../core/services/upload';
 })
 export class UploadComponent {
 
-  private readonly uploadService = inject(UploadService);
+  constructor(
+
+    private uploadService:UploadService,
+
+    private router:Router,
+
+    private session:SessionService
+
+){}
+
+  // private readonly uploadService = inject(UploadService);
 
   uploading = signal(false);
 
@@ -42,16 +55,25 @@ export class UploadComponent {
     this.progressText.set('Uploading PDF...');
 
     this.uploadService.upload(file).subscribe({
+      
+      next:(response)=>{
 
-      next: (response) => {
+     this.session.documentId = response.document_id;
 
-        console.log(response);
+    this.session.namespace = response.namespace;
 
-        this.progressText.set('Upload Complete');
+    this.session.filename = response.filename;
 
-        this.uploading.set(false);
+    this.session.pdfPath = response.pdf_path;
 
-      },
+    console.log('Upload Response', response);
+
+    console.log('Namespace Saved', this.session.namespace);
+
+    this.router.navigate(['/review']);
+
+}
+      ,
 
       error: (err) => {
 

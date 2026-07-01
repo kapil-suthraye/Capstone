@@ -71,11 +71,13 @@ class Chunker:
 
             )
 
-            chunks = self.merge_small_chunks(chunks)
+        # Merge after all chunks are created
+        chunks = self.merge_small_chunks(chunks)
 
-            chunks = self.remove_duplicate_chunks(chunks)
+        # Remove duplicates
+        chunks = self.remove_duplicate_chunks(chunks)
 
-            return chunks
+        return chunks
 
     ####################################################################
     # PARAGRAPH BUILDER
