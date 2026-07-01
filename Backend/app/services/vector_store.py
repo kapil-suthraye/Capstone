@@ -7,8 +7,8 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from Backend.app.core.config import settings
 from Backend.app.models.document_chunk import DocumentChunk
-from Backend.app.services.embedding_service import EmbeddingService
 from Backend.app.models.retrieved_chunk import RetrievedChunk
+from Backend.app.services.embedding_service import EmbeddingService
 
 
 class VectorStore:
@@ -35,6 +35,7 @@ class VectorStore:
         )
 
         self.embedder = EmbeddingService()
+
     ####################################################################
     # UPSERT
     ####################################################################
@@ -65,34 +66,32 @@ class VectorStore:
 
         for chunk, embedding in zip(chunks, embeddings):
 
+            metadata = {
+
+                **chunk.metadata,
+
+                "text": chunk.text,
+                "source_file": chunk.source_file,
+                "page_start": chunk.page_start,
+                "page_end": chunk.page_end,
+                "section_heading": chunk.section_heading,
+                "document_category": chunk.document_category,
+                "token_count": chunk.token_count,
+
+            }
+
+            # Pinecone does not allow None values
+            metadata = {
+                key: ("" if value is None else value)
+                for key, value in metadata.items()
+            }
+
             vectors.append(
 
                 {
-
                     "id": chunk.id,
-
                     "values": embedding,
-
-                    "metadata": {
-
-                        **chunk.metadata,
-
-                        "text": chunk.text,
-
-                        "source_file": chunk.source_file,
-
-                        "page_start": chunk.page_start,
-
-                        "page_end": chunk.page_end,
-
-                        "section_heading": chunk.section_heading,
-
-                        "document_category": chunk.document_category,
-
-                        "token_count": chunk.token_count,
-
-                    }
-
+                    "metadata": metadata,
                 }
 
             )
@@ -100,62 +99,67 @@ class VectorStore:
         self.index.upsert(
 
             vectors=vectors,
-
             namespace=namespace,
 
         )
 
-        print(f"Uploaded {len(vectors)} vectors.")
+        print(
+            f"Uploaded {len(vectors)} vectors to namespace {namespace}"
+        )
+
     ####################################################################
     # SEARCH
     ####################################################################
 
     async def similarity_search(
-
-        self,
-
-        query: str,
-
-        namespace: str,
-
-        diagnosis_tag: Optional[str] = None,
-
-        top_k: int = 20,
-
-    ):
+    self,
+    query: str,
+    namespace: str,
+    diagnosis_tag: Optional[str] = None,
+    top_k: int = 20,
+):
 
         embedding = await self.embedder.embed(query)
+
+        print("\n" + "=" * 80)
+        print("SIMILARITY SEARCH")
+        print("=" * 80)
+        print("Namespace :", namespace)
+        print("Query     :", query)
+        print("Diagnosis :", diagnosis_tag)
 
         metadata_filter = {}
 
         if diagnosis_tag:
-
             metadata_filter = {
-
                 "diagnosis_tag": {
-
                     "$eq": diagnosis_tag
-
                 }
-
             }
 
+        print("Filter :", metadata_filter)
+
         result = self.index.query(
-
             namespace=namespace,
-
             vector=embedding,
-
             top_k=top_k,
-
             include_metadata=True,
-
             filter=metadata_filter if metadata_filter else None,
-
         )
 
+        print()
+        print("Matches Found :", len(result.matches))
+
+        for match in result.matches:
+            print("--------------------------------")
+            print("Score :", match.score)
+            print("Heading :", match.metadata.get("section_heading"))
+            print(match.metadata.get("text", "")[:150])
+
+        print("=" * 80)
+
         return result.matches
-    
+
     ####################################################################
     # RERANK
     ####################################################################
@@ -173,7 +177,6 @@ class VectorStore:
     ):
 
         if not matches:
-
             return []
 
         documents = []
@@ -213,7 +216,7 @@ class VectorStore:
             )
 
         return final
-    
+
     ####################################################################
     # RETRIEVE
     ####################################################################
@@ -247,9 +250,11 @@ class VectorStore:
         )
 
         reranked = self.rerank(
+
             query,
             matches,
             rerank_top_n,
+
         )
 
         results = []
@@ -273,4 +278,3 @@ class VectorStore:
             )
 
         return results
-    

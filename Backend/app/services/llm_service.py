@@ -114,17 +114,46 @@ class LLMService:
             query=prompt.rag_search_keywords
                 or prompt.evaluation_prompt,
             namespace=namespace,
-            diagnosis_tag=prompt.job_aid,
+            diagnosis_tag=None,
         )
+
+        # ===================== DEBUG START =====================
+
+        print("\n" + "=" * 100)
+        print("PROMPT ID :", prompt.prompt_id)
+        print("QUESTION  :", prompt.evaluation_prompt)
+        print("NAMESPACE :", namespace)
+        print("TOTAL RETRIEVED CHUNKS :", len(docs))
+        print("=" * 100)
+
+        for i, doc in enumerate(docs, start=1):
+
+            print(f"\n----- Chunk {i} -----")
+
+            print("Heading :",
+                doc.metadata.get("section_heading"))
+
+            print("Pages :",
+                f"{doc.metadata.get('page_start')} - {doc.metadata.get('page_end')}")
+
+            print("Diagnosis Tag :",
+                doc.metadata.get("diagnosis_tag"))
+
+            print("\nText:\n")
+
+            print(doc.text[:1000])
+
+            print("-" * 100)
+
+        print("=" * 100 + "\n")
+
+        # ===================== DEBUG END =====================
 
         context, evidence = self.build_context(docs)
 
         messages = self.PROMPT.format_messages(
-
             question=prompt.evaluation_prompt,
-
             context=context,
-
         )
 
         response = await self.llm.ainvoke(messages)
@@ -132,13 +161,9 @@ class LLMService:
         data = json.loads(response.content)
 
         return EvaluationResult(
-
             answer=data["answer"],
-
             justification=data["justification"],
-
             supporting_evidence=evidence,
-
         )
     
     async def evaluate_all(

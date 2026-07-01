@@ -1,29 +1,29 @@
 from Backend.app.services.pdf_parser import PDFParser
-
 from Backend.app.services.chunking import Chunker
-
 from Backend.app.services.vector_store import VectorStore
+
 
 class IngestionService:
 
     def __init__(self):
 
-        self.parser=PDFParser()
+        self.parser = PDFParser()
+        self.chunker = Chunker()
+        self.vector = VectorStore()
 
-        self.chunker=Chunker()
+    async def ingest(
+        self,
+        pdf_path: str,
+        namespace: str,
+    ):
 
-        self.vector=VectorStore()
+        parsed = self.parser.parse(pdf_path)
 
-    def ingest(
-    self,
-    pdf_path: str,
-    namespace: str
-):
+        chunks = self.chunker.chunk_document(parsed)
 
-        parsed=self.parser.parse(pdf_path)
-
-        chunks=self.chunker.chunk_document(parsed)
-
-        self.vector.upsert_chunks(chunks, namespace=namespace)
+        await self.vector.upsert_chunks(
+            chunks,
+            namespace=namespace,
+        )
 
         return chunks

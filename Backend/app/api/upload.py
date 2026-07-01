@@ -54,7 +54,7 @@ async def upload_pdf(
     # Ingest document into Pinecone
     service = IngestionService()
 
-    chunks = service.ingest(
+    chunks = await service.ingest(
         filepath,
         namespace=namespace,
     )
