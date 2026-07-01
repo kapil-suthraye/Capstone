@@ -9,6 +9,8 @@ from fastapi import (
 )
 
 from Backend.app.models.api_models import UploadResponse
+from Backend.app.core.logging import logger
+from Backend.app.db.review_store import review_store
 from Backend.app.services.ingestion_service import IngestionService
 
 router = APIRouter(
@@ -58,6 +60,20 @@ async def upload_pdf(
         filepath,
         namespace=namespace,
     )
+
+    review_store.register_claim(
+        document_id=document_id,
+        namespace=namespace,
+        filename=file.filename,
+        pdf_path=filepath,
+    )
+
+    logger.bind(
+        document_id=document_id,
+        namespace=namespace,
+        filename=file.filename,
+        chunks=len(chunks),
+    ).info("medical_record_uploaded")
 
     return UploadResponse(
 

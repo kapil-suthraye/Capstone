@@ -1,67 +1,29 @@
 import {
-
-Component,
-
-Input,
-
-Output,
-
-EventEmitter
-
+  Component,
+  EventEmitter,
+  Input,
+  Output
 } from '@angular/core';
 
-import { EvaluationResult }
-
-from '../../../core/models/evaluation-result';
-
-import { CommonModule } from '@angular/common';
-
-import { MatCardModule } from '@angular/material/card';
-
-import { MatExpansionModule } from '@angular/material/expansion';
-
-import { MatButtonModule } from '@angular/material/button';
+import { EvaluationResult } from '../../../core/models/evaluation-result';
 
 @Component({
-
-selector:'app-evidence-card',
-
-standalone:true,
-
-templateUrl:'./evidence-card.html',
-
-styleUrl:'./evidence-card.scss',
-
-imports:[
-
-CommonModule,
-
-MatCardModule,
-
-MatExpansionModule,
-
-MatButtonModule
-
-]
-
+  selector: 'app-evidence-card',
+  standalone: true,
+  templateUrl: './evidence-card.html',
+  styleUrl: './evidence-card.scss'
 })
+export class EvidenceCardComponent {
 
-export class EvidenceCardComponent{
+  @Input({ required: true })
+  result!: EvaluationResult;
 
-@Input(
+  @Output()
+  openEvidence = new EventEmitter<number>();
 
-{
-
-required:true
-
-}
-
-)
-
-result!:EvaluationResult;
-
-@Output()
-
-openEvidence = new EventEmitter<number>();
+  evidenceKey(index: number): string {
+    const evidence = this.result.supporting_evidence[index];
+    return evidence.chunk_id || `${evidence.page}-${evidence.heading}-${index}`;
+  }
 
 }

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api';
 
 import { EvaluationResult } from '../models/evaluation-result';
+import { ClaimSummary } from '../models/claim-summary';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,14 @@ export class ReviewService {
         namespace: namespace,
         prompt_id: promptId
       }
+    );
+
+  }
+
+  getSummary(namespace: string): Observable<ClaimSummary> {
+
+    return this.api.get<ClaimSummary>(
+      `claims/${namespace}/summary`
     );
 
   }

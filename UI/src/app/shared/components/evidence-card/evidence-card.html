@@ -1,31 +1,42 @@
-<div class="supporting-evidence">
+<section class="supporting-evidence">
 
-    <div
-        class="evidence-card"
-        *ngFor="let evidence of result.supporting_evidence">
-
-        <div class="evidence-header">
-
-            <span class="page">
-
-                📄 Page {{ evidence.page }}
-
-            </span>
-
-            <span class="heading">
-
-                {{ evidence.heading }}
-
-            </span>
-
+    <header>
+        <div>
+            <p class="eyebrow">Evidence trace</p>
+            <h2>Retrieved clinical context</h2>
         </div>
+        <span>{{result.supporting_evidence.length}} chunks</span>
+    </header>
 
-        <div class="evidence-body">
+    @for(evidence of result.supporting_evidence; track evidence.chunk_id || evidence.page + evidence.heading){
 
-            {{ evidence.evidence }}
+        <article class="evidence-card">
 
-        </div>
+            <div class="evidence-header">
 
-    </div>
+                <span class="page">
+                    <span class="material-symbols-rounded">description</span>
+                    Page {{ evidence.page }}
+                </span>
 
-</div>
+                <span class="heading">
+                    {{ evidence.heading }}
+                </span>
+
+            </div>
+
+            <!-- <p class="score">
+                Retrieval score: {{ evidence.score || 0 }}
+            </p> -->
+
+            <div class="evidence-body">
+
+                {{ evidence.evidence }}
+
+            </div>
+
+        </article>
+
+    }
+
+</section>

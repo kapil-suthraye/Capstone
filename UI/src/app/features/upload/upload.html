@@ -1,12 +1,18 @@
 <div class="upload-page">
 
-    <h1>Upload Medical Record</h1>
+    <section class="upload-intro">
+        <p class="eyebrow">New claim</p>
+        <h1>Upload medical record</h1>
+        <p>
+            The record is parsed, chunked, embedded, and stored against a claim namespace for AI review.
+        </p>
+    </section>
 
     <div class="upload-card">
 
         <span class="material-symbols-rounded upload-icon">
 
-            upload_file
+            cloud_upload
 
         </span>
 
@@ -16,7 +22,12 @@
 
         </h2>
 
+        <p class="helper">
+            PDF only. Large medical records can take a moment while retrieval context is prepared.
+        </p>
+
         <input
+            #fileInput
 
             type="file"
 
@@ -26,10 +37,30 @@
 
         >
 
+        <button
+            type="button"
+            class="browse-button"
+            [disabled]="uploading()"
+            (click)="browse(fileInput)">
+            <span class="material-symbols-rounded">folder_open</span>
+            Browse PDF
+        </button>
+
+        @if(uploadedFile()){
+            <div class="file-chip">
+                <span class="material-symbols-rounded">picture_as_pdf</span>
+                {{uploadedFile()?.name}}
+            </div>
+        }
+
         @if(uploading()){
 
         <div class="loader"></div>
 
+        }
+
+        @if(errorMessage()){
+            <p class="error">{{errorMessage()}}</p>
         }
 
     </div>

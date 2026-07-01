@@ -6,6 +6,7 @@ from pinecone import Pinecone
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from Backend.app.core.config import settings
+from Backend.app.core.logging import logger
 from Backend.app.models.document_chunk import DocumentChunk
 from Backend.app.models.retrieved_chunk import RetrievedChunk
 from Backend.app.services.embedding_service import EmbeddingService
@@ -103,9 +104,10 @@ class VectorStore:
 
         )
 
-        print(
-            f"Uploaded {len(vectors)} vectors to namespace {namespace}"
-        )
+        logger.bind(
+            namespace=namespace,
+            vectors=len(vectors),
+        ).info("vectors_uploaded")
 
     ####################################################################
     # SEARCH
@@ -121,13 +123,6 @@ class VectorStore:
 
         embedding = await self.embedder.embed(query)
 
-        print("\n" + "=" * 80)
-        print("SIMILARITY SEARCH")
-        print("=" * 80)
-        print("Namespace :", namespace)
-        print("Query     :", query)
-        print("Diagnosis :", diagnosis_tag)
-
         metadata_filter = {}
 
         if diagnosis_tag:
@@ -137,8 +132,6 @@ class VectorStore:
                 }
             }
 
-        print("Filter :", metadata_filter)
-
         result = self.index.query(
             namespace=namespace,
             vector=embedding,
@@ -147,16 +140,13 @@ class VectorStore:
             filter=metadata_filter if metadata_filter else None,
         )
 
-        print()
-        print("Matches Found :", len(result.matches))
-
-        for match in result.matches:
-            print("--------------------------------")
-            print("Score :", match.score)
-            print("Heading :", match.metadata.get("section_heading"))
-            print(match.metadata.get("text", "")[:150])
-
-        print("=" * 80)
+        logger.bind(
+            namespace=namespace,
+            top_k=top_k,
+            matches=len(result.matches),
+            diagnosis_tag=diagnosis_tag,
+            has_filter=bool(metadata_filter),
+        ).info("similarity_search_completed")
 
         return result.matches
 

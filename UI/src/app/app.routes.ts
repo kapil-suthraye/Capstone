@@ -8,6 +8,10 @@ import { UploadComponent } from './features/upload/upload';
 
 import { ReviewComponent } from './features/review/review';
 
+import { ClaimSummaryComponent } from './features/claim-summary/claim-summary';
+
+// import { ObservabilityComponent } from './features/observability/observability';
+
 export const routes: Routes = [
 
   {
@@ -36,7 +40,22 @@ export const routes: Routes = [
       {
         path: 'review',
         component: ReviewComponent
+      },
+
+      {
+        path: 'summary',
+        component: ClaimSummaryComponent
+      },
+
+      {
+        path: 'summary/:namespace',
+        component: ClaimSummaryComponent
       }
+
+      // {
+      //   path: 'observability',
+      //   component: ObservabilityComponent
+      // }
 
     ]
   }

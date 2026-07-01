@@ -42,16 +42,17 @@ menu = signal([
   },
 
   {
-    icon: 'history',
-    title: 'Review History',
-    route: '/history'
-  },
-
-  {
-    icon: 'settings',
-    title: 'Settings',
-    route: '/settings'
+    icon: 'summarize',
+    title: 'Claim Summary',
+    route: '/summary'
   }
+  // ,
+
+  // {
+  //   icon: 'monitoring',
+  //   title: 'Observability',
+  //   route: '/observability'
+  // }
 
 ]);
 

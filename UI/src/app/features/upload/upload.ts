@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 import { UploadService } from '../../core/services/upload';
 
@@ -30,9 +30,11 @@ export class UploadComponent {
 
   uploading = signal(false);
 
-  progressText = signal('Drop a PDF or browse');
+  progressText = signal('Ready for medical record upload');
 
   uploadedFile = signal<File | null>(null);
+
+  errorMessage = signal('');
 
   onFileSelected(event: Event): void {
 
@@ -52,11 +54,15 @@ export class UploadComponent {
 
     this.uploading.set(true);
 
-    this.progressText.set('Uploading PDF...');
+    this.errorMessage.set('');
+
+    this.progressText.set('Uploading and indexing PDF...');
 
     this.uploadService.upload(file).subscribe({
       
       next:(response)=>{
+
+     this.session.clear();
 
      this.session.documentId = response.document_id;
 
@@ -81,12 +87,18 @@ export class UploadComponent {
 
         this.progressText.set('Upload Failed');
 
+        this.errorMessage.set('The PDF could not be uploaded or indexed. Check backend logs and try again.');
+
         this.uploading.set(false);
 
       }
 
     });
 
+  }
+
+  browse(fileInput: HTMLInputElement): void {
+    fileInput.click();
   }
 
 }

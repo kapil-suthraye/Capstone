@@ -1,23 +1,78 @@
-<div class="recommendation">
+<article class="decision-card">
 
-{{result.answer}}
+    <header>
+        <span
+            class="status-pill"
+            [class.valid]="result.verdict === 'valid'"
+            [class.doubtful]="result.verdict === 'doubtful'"
+            [class.insufficient_evidence]="result.verdict === 'insufficient_evidence'">
+            {{verdictLabel()}}
+        </span>
 
-</div>
+        <h2>{{result.answer}}</h2>
 
-<div>
+        @if(result.question){
+            <p class="question">{{result.question}}</p>
+        }
+    </header>
 
-Confidence
+    <section class="confidence">
+        <div>
+            <span>Confidence</span>
+            <strong>{{result.confidence}}%</strong>
+        </div>
+        <div class="meter">
+            <span [style.width.%]="result.confidence"></span>
+        </div>
+    </section>
 
-<strong>
+    <section>
+        <h3>Final summary</h3>
+        <p>{{result.final_summary}}</p>
+    </section>
 
-{{result.confidence}}%
+    <section>
+        <h3>Justification</h3>
+        <p>{{result.justification}}</p>
+    </section>
 
-</strong>
+    @if(result.decision_impact){
+        <section>
+            <h3>Decision impact</h3>
+            <p>{{result.decision_impact}}</p>
+        </section>
+    }
 
-</div>
+    @if(result.follow_up_actions.length){
+        <section>
+            <h3>Next actions</h3>
+            <ul>
+                @for(action of result.follow_up_actions; track action){
+                    <li>{{action}}</li>
+                }
+            </ul>
+        </section>
+    }
 
-<p>
+    @if(result.ragas_metrics){
+        <section class="ragas-grid">
+            <div>
+                <span>Faithfulness</span>
+                <strong>{{metric(result.ragas_metrics.faithfulness)}}</strong>
+            </div>
+            <div>
+                <span>Relevancy</span>
+                <strong>{{metric(result.ragas_metrics.answer_relevancy)}}</strong>
+            </div>
+            <div>
+                <span>Context precision</span>
+                <strong>{{metric(result.ragas_metrics.context_precision)}}</strong>
+            </div>
+            <div>
+                <span>Context recall</span>
+                <strong>{{metric(result.ragas_metrics.context_recall)}}</strong>
+            </div>
+        </section>
+    }
 
-{{result.justification}}
-
-</p>
+</article>

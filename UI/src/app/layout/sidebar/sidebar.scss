@@ -1,85 +1,107 @@
 .sidebar{
-
-width:260px;
-
-background:white;
-
-padding:30px;
-
-border-right:1px solid #EAEAEA;
-
-display:flex;
-
-flex-direction:column;
-
+  width:268px;
+  min-height:100vh;
+  background:#0f172a;
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  color:white;
 }
 
 .logo{
-
-margin-bottom:40px;
-
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:28px;
 }
 
 .logo h1{
-
-margin:0;
-
-color:#5A73A5;
-
-font-size:28px;
-
+  margin:0;
+  color:white;
+  font-size:22px;
+  line-height:1.05;
 }
 
 .logo p{
+  margin:4px 0 0;
+  color:#93c5fd;
+  font-weight:700;
+  letter-spacing:0;
+  text-transform:uppercase;
+  font-size:12px;
+}
 
-margin-top:6px;
-
-color:#FF90AD;
-
+.logo-mark{
+  width:44px;
+  height:44px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#38bdf8,#22c55e);
+  color:#0f172a;
+  font-weight:800;
 }
 
 nav{
-
-display:flex;
-
-flex-direction:column;
-
-gap:12px;
-
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 a{
-
-display:flex;
-
-align-items:center;
-
-gap:15px;
-
-padding:15px;
-
-border-radius:15px;
-
-text-decoration:none;
-
-color:#637A93;
-
-font-weight:500;
-
-transition:.25s;
-
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:46px;
+  padding:11px 12px;
+  border-radius:8px;
+  text-decoration:none;
+  color:#cbd5e1;
+  font-weight:700;
+  transition:.18s ease;
 }
 
 a:hover{
-
-background:#F9F3FF;
-
+  background:rgba(148,163,184,.16);
+  color:white;
 }
 
 .active{
+  background:white;
+  color:#0f172a;
+}
 
-background:#FFE8EF;
+.review-note{
+  margin-top:auto;
+  padding:14px;
+  border:1px solid rgba(148,163,184,.28);
+  border-radius:8px;
+  background:rgba(15,23,42,.36);
+}
 
-color:#FF8BA9;
+.review-note span{
+  color:#86efac;
+}
 
+.review-note p{
+  margin:8px 0 0;
+  color:#cbd5e1;
+  font-size:13px;
+  line-height:1.45;
+}
+
+@media(max-width:900px){
+  .sidebar{
+    width:100%;
+    min-height:auto;
+  }
+
+  nav{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .review-note{
+    display:none;
+  }
 }

@@ -1,31 +1,29 @@
 .layout{
-
-display:flex;
-
-height:100vh;
-
-background:#FFF9F4;
-
+  display:flex;
+  min-height:100vh;
+  background:var(--page);
 }
 
 .content{
-
-display:flex;
-
-flex-direction:column;
-
-flex:1;
-
-overflow:hidden;
-
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  min-width:0;
+  overflow:hidden;
 }
 
 main{
+  height:100%;
+  overflow:auto;
+  padding:28px;
+}
 
-padding:30px;
+@media(max-width:900px){
+  .layout{
+    flex-direction:column;
+  }
 
-overflow:auto;
-
-height:100%;
-
+  main{
+    padding:18px;
+  }
 }
