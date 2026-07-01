@@ -19,7 +19,13 @@ class EvaluationResult(BaseModel):
 
     justification: str
 
-    supporting_evidence: List[str]
+    supporting_evidence: List[SupportingEvidence]
+
+class SupportingEvidence(BaseModel):
+    page: str
+    heading: str
+    score: float | None = None
+    evidence: str
 
 class LLMService:
 
@@ -39,15 +45,18 @@ class LLMService:
 
     PROMPT = ChatPromptTemplate.from_template(
         """
-        You are an expert clinical documentation reviewer.
+       Carefully inspect every retrieved chunk.
 
-        Answer ONLY using the supplied clinical context.
+        The answer may appear using different wording,
+        medical abbreviations,
+        or synonymous clinical terminology.
 
-        If the answer is not supported,
-        respond exactly:
+        Only return Insufficient Evidence
+        after reviewing every chunk.
 
-        Answer: Insufficient Evidence
-
+        If partial evidence exists,
+        provide the closest supported answer
+        and explain why.
         Return valid JSON.
 
         Question
@@ -160,10 +169,24 @@ class LLMService:
 
         data = json.loads(response.content)
 
+        supporting_evidence = []
+
+        for doc in docs:
+            supporting_evidence.append({
+                "page": f"{doc.metadata.get('page_start', '-')}"
+                        + (
+                            f" - {doc.metadata.get('page_end')}"
+                            if doc.metadata.get("page_end") != doc.metadata.get("page_start")
+                            else ""
+                        ),
+                "heading": doc.metadata.get("section_heading", "Unknown"),
+                "evidence": doc.text[:300]
+            })
+
         return EvaluationResult(
             answer=data["answer"],
             justification=data["justification"],
-            supporting_evidence=evidence,
+            supporting_evidence=supporting_evidence,
         )
     
     async def evaluate_all(

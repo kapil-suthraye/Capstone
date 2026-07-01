@@ -1,21 +1,11 @@
 export interface SupportingEvidence {
-
-    page: number;
-
-    section: string;
-
-    snippet: string;
-
+  page: string;
+  heading: string;
+  evidence: string;
 }
 
 export interface EvaluationResult {
-
-    answer: string;
-
-    confidence: number;
-
-    justification: string;
-
-    supporting_evidence: SupportingEvidence[];
-
+  answer: string;
+  justification: string;
+  supporting_evidence: SupportingEvidence[];
 }

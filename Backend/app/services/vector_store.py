@@ -231,9 +231,9 @@ class VectorStore:
 
         diagnosis_tag=None,
 
-        top_k=20,
+        top_k=50,
 
-        rerank_top_n=5,
+        rerank_top_n=12,
 
     ):
 

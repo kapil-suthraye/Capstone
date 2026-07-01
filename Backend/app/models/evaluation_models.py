@@ -22,3 +22,10 @@ class EvaluationResult(BaseModel):
     confidence:float
 
     supporting_evidence:List[Evidence]
+
+
+class SupportingEvidence(BaseModel):
+    page: str
+    heading: str
+    score: float | None = None
+    evidence: str

@@ -1,37 +1,31 @@
-<h2>
+<div class="supporting-evidence">
 
-Evidence Review
+    <div
+        class="evidence-card"
+        *ngFor="let evidence of result.supporting_evidence">
 
-</h2>
+        <div class="evidence-header">
 
-<div>
+            <span class="page">
 
-Answer
+                📄 Page {{ evidence.page }}
 
-{{result.answer}}
+            </span>
 
-</div>
+            <span class="heading">
 
-<div>
+                {{ evidence.heading }}
 
-Confidence
+            </span>
 
-{{result.confidence}}
+        </div>
 
-</div>
+        <div class="evidence-body">
 
-<p>
+            {{ evidence.evidence }}
 
-{{result.justification}}
+        </div>
 
-</p>
-
-@for(item of result.supporting_evidence; track item.page){
-
-<div>
-
-Page {{item.page}}
+    </div>
 
 </div>
-
-}
