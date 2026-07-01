@@ -14,12 +14,16 @@ class IngestionService:
 
         self.vector=VectorStore()
 
-    def ingest(self,pdf):
+    def ingest(
+    self,
+    pdf_path: str,
+    namespace: str
+):
 
-        parsed=self.parser.parse(pdf)
+        parsed=self.parser.parse(pdf_path)
 
         chunks=self.chunker.chunk_document(parsed)
 
-        self.vector.upsert_chunks(chunks)
+        self.vector.upsert_chunks(chunks, namespace=namespace)
 
         return chunks

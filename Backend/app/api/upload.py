@@ -1,5 +1,6 @@
 import os
 import uuid
+import shutil
 
 from fastapi import (
     APIRouter,
@@ -22,7 +23,6 @@ os.makedirs(
     exist_ok=True,
 )
 
-
 @router.post(
     "/upload",
     response_model=UploadResponse,
@@ -31,28 +31,46 @@ async def upload_pdf(
     file: UploadFile = File(...)
 ):
 
-    filename = f"{uuid.uuid4()}_{file.filename}"
+    # Generate a unique document id
+    document_id = str(uuid.uuid4())
+
+    # Use document id as Pinecone namespace
+    namespace = document_id
+
+    # Save uploaded PDF
+    filename = f"{document_id}_{file.filename}"
 
     filepath = os.path.join(
         UPLOAD_FOLDER,
         filename,
     )
 
-    with open(filepath, "wb") as f:
-        f.write(await file.read())
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(
+            file.file,
+            buffer,
+        )
 
+    # Ingest document into Pinecone
     service = IngestionService()
 
-    chunks = service.ingest(filepath)
+    chunks = service.ingest(
+        filepath,
+        namespace=namespace,
+    )
 
     return UploadResponse(
 
-        document_id=filename,
+        document_id=document_id,
+
+        namespace=namespace,
 
         filename=file.filename,
 
+        pdf_path=filepath,
+
         chunks=len(chunks),
 
-        message="Document uploaded successfully",
+        message="Document uploaded successfully"
 
     )

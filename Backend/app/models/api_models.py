@@ -3,7 +3,9 @@ from pydantic import BaseModel
 
 class UploadResponse(BaseModel):
     document_id: str
+    namespace: str
     filename: str
+    pdf_path: str
     chunks: int
     message: str
 
