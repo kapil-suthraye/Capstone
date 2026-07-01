@@ -1,0 +1,53 @@
+<div class="review-layout">
+
+    <aside class="left-panel">
+
+        <div class="prompt-list">
+
+            <h2>Clinical Prompts</h2>
+
+            @for(prompt of prompts(); track prompt.prompt_id){
+
+                <div
+                    class="prompt"
+                    (click)="selectPrompt(prompt)">
+
+                    <h4>{{prompt.category}}</h4>
+
+                    <p>{{prompt.evaluation_prompt}}</p>
+
+                </div>
+
+            }
+
+        </div>
+
+    </aside>
+
+    <section class="center-panel">
+
+        <app-patient-card></app-patient-card>
+
+        @if(result()){
+
+            <app-evidence-card
+                [result]="result()!">
+            </app-evidence-card>
+
+        }
+
+    </section>
+
+    <aside class="right-panel">
+
+        @if(result()){
+
+            <app-suggestion-card
+                [result]="result()!">
+            </app-suggestion-card>
+
+        }
+
+    </aside>
+
+</div>

@@ -1,0 +1,37 @@
+<h2>
+
+Evidence Review
+
+</h2>
+
+<div>
+
+Answer
+
+{{result.answer}}
+
+</div>
+
+<div>
+
+Confidence
+
+{{result.confidence}}
+
+</div>
+
+<p>
+
+{{result.justification}}
+
+</p>
+
+@for(item of result.supporting_evidence; track item.page){
+
+<div>
+
+Page {{item.page}}
+
+</div>
+
+}

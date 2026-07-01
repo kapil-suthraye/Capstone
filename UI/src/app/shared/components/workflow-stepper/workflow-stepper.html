@@ -1,0 +1,33 @@
+<div class="workflow">
+
+    <div
+
+        class="step"
+
+        *ngFor="let step of steps; let last = last"
+
+    >
+
+        <div class="circle">
+
+            <span class="material-symbols-rounded">
+
+                task
+
+            </span>
+
+        </div>
+
+        <p>{{step}}</p>
+
+        <div
+
+            class="line"
+
+            *ngIf="!last"
+
+        ></div>
+
+    </div>
+
+</div>

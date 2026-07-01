@@ -1,0 +1,47 @@
+.review-layout{
+
+display:grid;
+
+grid-template-columns:300px 1fr 360px;
+
+gap:24px;
+
+height:100%;
+
+}
+
+section{
+
+display:flex;
+
+flex-direction:column;
+
+gap:20px;
+
+}
+
+@media(max-width:1400px){
+
+.review-layout{
+
+grid-template-columns:280px 1fr;
+
+}
+
+.review-layout>aside:last-child{
+
+grid-column:span 2;
+
+}
+
+}
+
+@media(max-width:992px){
+
+.review-layout{
+
+grid-template-columns:1fr;
+
+}
+
+}

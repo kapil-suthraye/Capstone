@@ -1,0 +1,45 @@
+<div class="sidebar">
+
+<div class="logo">
+
+<h1>
+
+Medical AI
+
+</h1>
+
+<p>
+
+Reviewer
+
+</p>
+
+</div>
+
+<nav>
+
+@for(item of menu(); track item.route){
+
+<a
+
+[routerLink]="item.route"
+
+routerLinkActive="active"
+
+>
+
+<span class="material-symbols-rounded">
+
+{{item.icon}}
+
+</span>
+
+{{item.title}}
+
+</a>
+
+}
+
+</nav>
+
+</div>

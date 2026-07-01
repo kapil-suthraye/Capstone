@@ -1,0 +1,57 @@
+<section class="history">
+
+    <h2>Recent Reviews</h2>
+
+    <table>
+
+        <thead>
+
+        <tr>
+
+            <th>Claim</th>
+
+            <th>Patient</th>
+
+            <th>Diagnosis</th>
+
+            <th>Status</th>
+
+            <th>Date</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        @for(claim of claims(); track claim.claim_id){
+
+            <tr>
+
+                <td>{{claim.claim_id}}</td>
+
+                <td>{{claim.patient}}</td>
+
+                <td>{{claim.diagnosis}}</td>
+
+                <td>
+
+                    <span class="status">
+
+                        {{claim.status}}
+
+                    </span>
+
+                </td>
+
+                <td>{{claim.review_date}}</td>
+
+            </tr>
+
+        }
+
+        </tbody>
+
+    </table>
+
+</section>
