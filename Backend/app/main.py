@@ -1,6 +1,9 @@
 from time import perf_counter
 from uuid import uuid4
 
+import uvicorn
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,6 +25,13 @@ app = FastAPI(
     version="1.0.0",
 )
 
+if __name__ == "__main__":
+    uvicorn.run(
+        "Backend.app.main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8000))
+    )
+
 cors_origins = [
     origin.strip()
     for origin in settings.CORS_ORIGINS.split(",")
@@ -30,7 +40,7 @@ cors_origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

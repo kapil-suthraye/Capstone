@@ -5,7 +5,7 @@
             <p class="eyebrow">Evidence trace</p>
             <h2>Retrieved clinical context</h2>
         </div>
-        <span>{{result.supporting_evidence.length}} chunks</span>
+        <!-- <span>{{result.supporting_evidence.length}} chunks</span> -->
     </header>
 
     @for(evidence of result.supporting_evidence; track evidence.chunk_id || evidence.page + evidence.heading){

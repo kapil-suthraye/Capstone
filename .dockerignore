@@ -1,0 +1,14 @@
+**/__pycache__/
+**/*.pyc
+.venv/
+venv/
+.git/
+.gitignore
+.env
+.env.*
+UI/node_modules/
+UI/dist/
+medical_records/
+*.md
+.vscode/
+.idea/

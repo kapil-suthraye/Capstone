@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -34,5 +35,14 @@ class Settings(BaseSettings):
         env_file=BASE_DIR / ".env",
         extra="ignore",
     )
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Split the comma-separated CORS_ORIGINS env var into a clean list."""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
 
 settings = Settings()
