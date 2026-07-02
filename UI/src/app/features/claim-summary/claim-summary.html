@@ -1,0 +1,132 @@
+<section class="summary-page">
+
+    @if(loading()){
+        <div class="loading-state">
+            <div class="loader"></div>
+            <p>Building claim summary...</p>
+        </div>
+    }
+
+    @if(errorMessage()){
+        <div class="empty-state">
+            <span class="material-symbols-rounded">summarize</span>
+            <h2>Claim summary unavailable</h2>
+            <p>{{errorMessage()}}</p>
+            <a routerLink="/upload">Upload claim</a>
+        </div>
+    }
+
+    @if(summary()){
+        <div class="summary-hero">
+            <div>
+                <p class="eyebrow">Final claim summary</p>
+                <h1>{{summary()!.claim_id}}</h1>
+                <p>{{summary()!.filename}}</p>
+            </div>
+
+            <span
+                class="status-pill"
+                [class.valid]="summary()!.verdict === 'valid'"
+                [class.doubtful]="summary()!.verdict === 'doubtful'"
+                [class.insufficient_evidence]="summary()!.verdict === 'insufficient_evidence'">
+                {{verdictLabel(summary()!.verdict)}}
+            </span>
+        </div>
+
+        <div class="summary-grid">
+            <article>
+                <span class="material-symbols-rounded">speed</span>
+                <p>Average confidence</p>
+                <strong>{{summary()!.confidence}}%</strong>
+            </article>
+            <article>
+                <span class="material-symbols-rounded">rule</span>
+                <p>Reviewed criteria</p>
+                <strong>{{summary()!.reviewed_criteria}}</strong>
+            </article>
+            <article>
+                <span class="material-symbols-rounded">task_alt</span>
+                <p>Valid criteria</p>
+                <strong>{{summary()!.valid_criteria}}</strong>
+            </article>
+            <article>
+                <span class="material-symbols-rounded">warning</span>
+                <p>Doubtful / missing</p>
+                <strong>{{summary()!.doubtful_criteria + summary()!.insufficient_evidence_criteria}}</strong>
+            </article>
+        </div>
+
+        <div class="main-grid">
+            <article class="final-card">
+                <p class="eyebrow">Adjudication summary</p>
+                <h2>{{summary()!.status}}</h2>
+                <p>{{summary()!.final_summary}}</p>
+
+                <div class="actions">
+                    @for(action of summary()!.recommended_actions; track action){
+                        <div>
+                            <span class="material-symbols-rounded">arrow_right_alt</span>
+                            {{action}}
+                        </div>
+                    }
+                </div>
+            </article>
+
+            <article class="ragas-card">
+                <p class="eyebrow">RAGAS observability</p>
+                <h2>Evidence quality</h2>
+                <div class="ragas-grid">
+                    <div>
+                        <span>Faithfulness</span>
+                        <strong>{{metric(summary()!.ragas_metrics?.faithfulness)}}</strong>
+                    </div>
+                    <div>
+                        <span>Relevancy</span>
+                        <strong>{{metric(summary()!.ragas_metrics?.answer_relevancy)}}</strong>
+                    </div>
+                    <div>
+                        <span>Precision</span>
+                        <strong>{{metric(summary()!.ragas_metrics?.context_precision)}}</strong>
+                    </div>
+                    <div>
+                        <span>Recall</span>
+                        <strong>{{metric(summary()!.ragas_metrics?.context_recall)}}</strong>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        @if(summary()!.high_risk_findings.length){
+            <section class="risk-section">
+                <p class="eyebrow">Manual review focus</p>
+                <h2>High-risk findings</h2>
+                @for(finding of summary()!.high_risk_findings; track finding){
+                    <article>{{finding}}</article>
+                }
+            </section>
+        }
+
+        <section class="criteria-section">
+            <p class="eyebrow">Criteria detail</p>
+            <h2>Evaluation results</h2>
+
+            @for(result of summary()!.evaluation_results; track result.prompt_id){
+                <article class="criteria-card">
+                    <div>
+                        <span
+                            class="status-pill"
+                            [class.valid]="result.verdict === 'valid'"
+                            [class.doubtful]="result.verdict === 'doubtful'"
+                            [class.insufficient_evidence]="result.verdict === 'insufficient_evidence'">
+                            {{verdictLabel(result.verdict)}}
+                        </span>
+                        <h3>{{result.category}}</h3>
+                        <p>{{result.final_summary}}</p>
+                    </div>
+                    <strong>{{result.confidence}}%</strong>
+                </article>
+            }
+        </section>
+    }
+
+</section>

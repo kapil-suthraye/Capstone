@@ -1,0 +1,142 @@
+<section class="dashboard-hero">
+
+    <div>
+
+        <p class="eyebrow">Medical necessity review</p>
+
+        <h1>Evidence-led claim adjudication</h1>
+
+        <p class="hero-copy">
+            Upload medical records, review clinical criteria, and move doubtful claims into manual review with traceable evidence.
+        </p>
+
+    </div>
+
+    <a routerLink="/upload" class="primary-action">
+        <span class="material-symbols-rounded">upload_file</span>
+        Upload claim
+    </a>
+
+</section>
+
+<section class="stats-grid">
+
+    <article>
+        <span class="material-symbols-rounded">folder_open</span>
+        <p>Total claims</p>
+        <strong>{{claims().length}}</strong>
+    </article>
+
+    <article>
+        <span class="material-symbols-rounded">task_alt</span>
+        <p>Completed reviews</p>
+        <strong>{{completed()}}</strong>
+    </article>
+
+    <article>
+        <span class="material-symbols-rounded">warning</span>
+        <p>Doubtful claims</p>
+        <strong>{{doubtful()}}</strong>
+    </article>
+
+    <article>
+        <span class="material-symbols-rounded">speed</span>
+        <p>Avg confidence</p>
+        <strong>{{averageConfidence()}}%</strong>
+    </article>
+
+</section>
+
+<section class="history">
+
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Recent reviews</p>
+            <h2>Claim work queue</h2>
+        </div>
+    </div>
+
+    @if(claims().length){
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>Claim</th>
+
+                <th>Patient</th>
+
+                <th>Review focus</th>
+
+                <th>Verdict</th>
+
+                <th>Criteria</th>
+
+                <th>Confidence</th>
+
+                <th>Date</th>
+
+                <th></th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            @for(claim of claims(); track claim.claim_id){
+
+                <tr>
+
+                    <td><strong>{{claim.claim_id}}</strong></td>
+
+                    <td>{{claim.patient}}</td>
+
+                    <td>{{claim.diagnosis}}</td>
+
+                    <td>
+
+                        <span
+                            class="status-pill"
+                            [class.valid]="claim.verdict === 'valid'"
+                            [class.doubtful]="claim.verdict === 'doubtful'"
+                            [class.insufficient_evidence]="claim.verdict === 'insufficient_evidence'">
+                            {{verdictLabel(claim.verdict)}}
+                        </span>
+
+                    </td>
+
+                    <td>{{claim.reviewed_criteria}}</td>
+
+                    <td>{{claim.confidence}}%</td>
+
+                    <td>{{claim.review_date}}</td>
+
+                    <td>
+                        <a class="table-action" [routerLink]="['/summary', claim.namespace]">
+                            View
+                        </a>
+                    </td>
+
+                </tr>
+
+            }
+
+            </tbody>
+
+        </table>
+
+    } @else {
+
+        <div class="empty-state">
+            <span class="material-symbols-rounded">clinical_notes</span>
+            <h3>No claims reviewed yet</h3>
+            <p>Start by uploading a medical record. Your reviewed claim queue will appear here.</p>
+            <a routerLink="/upload">Upload first claim</a>
+        </div>
+
+    }
+
+</section>

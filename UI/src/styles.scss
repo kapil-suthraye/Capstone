@@ -1,0 +1,74 @@
+/* Google Font */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+html,
+body {
+
+  margin: 0;
+
+  padding: 0;
+
+  height: 100%;
+
+  font-family: 'Inter', sans-serif;
+
+  background: #FFF9F4;
+
+  color: #56677C;
+
+}
+
+*{
+
+  box-sizing:border-box;
+
+}
+
+:root{
+
+  --primary:#6AA9FF;
+
+  --secondary:#FF9BB2;
+
+  --success:#74C69D;
+
+  --warning:#FFD166;
+
+  --danger:#F28482;
+
+  --cream:#FFF9F4;
+
+  --card:#FFFFFF;
+
+  --text:#56677C;
+
+  --muted:#92A2B4;
+
+  --border:#E9EDF3;
+
+}
+
+.mat-mdc-card{
+
+  border-radius:20px !important;
+
+  border:1px solid var(--border);
+
+  box-shadow:
+
+      0 8px 30px rgba(0,0,0,.04) !important;
+
+}
+
+.mat-mdc-raised-button{
+
+  border-radius:14px !important;
+
+}
+
+.mat-mdc-outlined-button{
+
+  border-radius:14px !important;
+
+}

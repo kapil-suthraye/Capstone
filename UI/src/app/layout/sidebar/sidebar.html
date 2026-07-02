@@ -1,0 +1,51 @@
+<div class="sidebar">
+
+<div class="logo">
+
+<div class="logo-mark">M</div>
+
+<div>
+
+<h1>Medical AI</h1>
+
+<p>Reviewer</p>
+
+</div>
+
+</div>
+
+<nav>
+
+@for(item of menu(); track item.route){
+
+<a
+
+[routerLink]="item.route"
+
+routerLinkActive="active"
+
+>
+
+<span class="material-symbols-rounded">
+
+{{item.icon}}
+
+</span>
+
+{{item.title}}
+
+</a>
+
+}
+
+</nav>
+
+<div class="review-note">
+
+<span class="material-symbols-rounded">verified_user</span>
+
+<p>Audit-ready review traces and evidence-first adjudication.</p>
+
+</div>
+
+</div>

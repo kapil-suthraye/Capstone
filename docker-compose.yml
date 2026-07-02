@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - CORS_ORIGINS=http://localhost:4200
+      - PORT=8000
+    volumes:
+      - ./medical_records:/app/medical_records
+    env_file:
+      - Backend/.env   # your API keys / DB URLs, gitignored
+
+  frontend:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+    ports:
+      - "4200:8080"
+    depends_on:
+      - backend

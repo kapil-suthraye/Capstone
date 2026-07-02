@@ -1,0 +1,109 @@
+<div class="review-layout">
+
+    <aside class="prompt-panel">
+
+        <div class="panel-heading">
+            <p class="eyebrow">Criteria library</p>
+            <h2>Clinical prompts</h2>
+            <p>Select a criterion to evaluate against the uploaded medical record.</p>
+        </div>
+
+        @if(!claimReady()){
+            <div class="notice">
+                <span class="material-symbols-rounded">info</span>
+                Upload a medical record before running review.
+            </div>
+        }
+
+        <div class="prompt-list">
+            @for(prompt of prompts(); track prompt.prompt_id){
+
+                <button
+                    type="button"
+                    class="prompt"
+                    [class.active]="selectedPrompt()?.prompt_id === prompt.prompt_id"
+                    [disabled]="loading()"
+                    (click)="selectPrompt(prompt)">
+
+                    <span class="severity">{{prompt.severity_level || 'Clinical'}}</span>
+
+                    <!-- <strong>{{prompt.category}}</strong> -->
+
+                    <p>{{prompt.evaluation_prompt}}</p>
+
+                </button>
+
+            }
+        </div>
+
+    </aside>
+
+    <section class="review-workspace">
+
+        <div class="claim-strip">
+            <div>
+                <p class="eyebrow">Selected claim</p>
+                <h1>{{session.filename || 'No medical record selected'}}</h1>
+                <p>{{session.documentId || 'Upload a record to create a claim namespace.'}}</p>
+            </div>
+
+            <a [routerLink]="['/summary', session.namespace]" class="summary-link" [class.disabled]="!claimReady()">
+                <span class="material-symbols-rounded">summarize</span>
+                Final summary
+            </a>
+        </div>
+
+        <div class="status-grid">
+            <article>
+                <span class="material-symbols-rounded">rule</span>
+                <p>Criteria reviewed</p>
+                <strong>{{reviewedCount()}}</strong>
+            </article>
+
+            <article>
+                <span class="material-symbols-rounded">model_training</span>
+                <p>Reviewer model</p>
+                <strong>{{result()?.telemetry?.model || 'Ready'}}</strong>
+            </article>
+
+            <article>
+                <span class="material-symbols-rounded">timer</span>
+                <p>Latency</p>
+                <strong>{{result()?.telemetry?.latency_ms || 0}} ms</strong>
+            </article>
+        </div>
+
+        @if(errorMessage()){
+            <div class="error-banner">{{errorMessage()}}</div>
+        }
+
+        @if(loading()){
+            <div class="loading-state">
+                <div class="loader"></div>
+                <p>Reviewing retrieved evidence...</p>
+            </div>
+        }
+
+        @if(result()){
+            <div class="result-grid">
+
+                <app-suggestion-card
+                    [result]="result()!">
+                </app-suggestion-card>
+
+                <app-evidence-card
+                    [result]="result()!">
+                </app-evidence-card>
+
+            </div>
+        } @else if(!loading()){
+            <div class="empty-review">
+                <span class="material-symbols-rounded">fact_check</span>
+                <h3>Choose a clinical prompt</h3>
+                <p>The AI reviewer will return a verdict, summary, confidence, evidence, telemetry, and RAGAS metrics.</p>
+            </div>
+        }
+
+    </section>
+
+</div>

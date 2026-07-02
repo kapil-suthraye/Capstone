@@ -1,0 +1,93 @@
+.supporting-evidence{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:white;
+}
+
+.eyebrow{
+  margin:0 0 6px;
+  color:var(--primary);
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+h2{
+  margin:0;
+  color:var(--text);
+}
+
+header>span{
+  padding:6px 10px;
+  border-radius:999px;
+  background:#eff6ff;
+  color:#123a8c;
+  font-weight:800;
+}
+
+.evidence-card{
+  padding:16px;
+  border:1px solid var(--border);
+  border-left:4px solid var(--primary);
+  border-radius:8px;
+  background:white;
+}
+
+.evidence-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:8px;
+  font-weight:800;
+}
+
+.page{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:var(--primary);
+}
+
+.heading{
+  color:var(--muted);
+  font-size:13px;
+  text-align:right;
+}
+
+.score{
+  margin:0 0 10px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+.evidence-body{
+  white-space:pre-wrap;
+  line-height:1.6;
+  color:#334155;
+  font-size:14px;
+}
+
+@media(max-width:760px){
+  header,
+  .evidence-header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .heading{
+    text-align:left;
+  }
+}

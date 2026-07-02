@@ -1,0 +1,132 @@
+.upload-page {
+    display: grid;
+    grid-template-columns: minmax(280px, 420px) minmax(320px, 560px);
+    gap: 28px;
+    align-items: center;
+    min-height: calc(100vh - 150px);
+}
+
+.upload-intro,
+.upload-card {
+    border-radius: 8px;
+}
+
+.upload-intro {
+    padding: 32px;
+    color: white;
+    background: linear-gradient(135deg, #123a8c, #0f766e);
+    box-shadow: var(--shadow);
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: #7dd3fc;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.upload-intro h1 {
+    margin: 0 0 12px;
+    font-size: 34px;
+}
+
+.upload-intro p {
+    margin: 0;
+    color: #dbeafe;
+    line-height: 1.65;
+}
+
+.upload-card {
+    padding: 40px;
+    background: white;
+    border: 1px solid var(--border);
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.upload-icon {
+    font-size: 72px;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+input {
+    display: none;
+}
+
+.helper {
+    max-width: 420px;
+    margin: 0 auto 24px;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.browse-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+}
+
+.browse-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #123a8c;
+    font-weight: 700;
+}
+
+.loader {
+
+    width: 40px;
+
+    height: 40px;
+
+    margin: 25px auto;
+
+    border: 4px solid #EAEAEA;
+
+    border-top-color: var(--primary);
+
+    border-radius: 50%;
+
+    animation: spin .8s linear infinite;
+}
+
+.error {
+    margin: 18px 0 0;
+    color: var(--danger);
+    font-weight: 700;
+}
+
+@keyframes spin {
+
+    to {
+
+        transform: rotate(360deg);
+
+    }
+
+}
+
+@media(max-width:900px){
+    .upload-page {
+        grid-template-columns: 1fr;
+    }
+}
