@@ -31,10 +31,10 @@ class Settings(BaseSettings):
         BASE_DIR.parent / "data" / "jobaids" / "nurse_prompts_interqual.xlsx"
     )
 
-    model_config = SettingsConfigDict(
-        env_file=BASE_DIR / ".env",
-        extra="ignore",
-    )
+    # model_config = SettingsConfigDict(
+    #     env_file=BASE_DIR / ".env",
+    #     extra="ignore",
+    # )
 
     @property
     def cors_origins_list(self) -> List[str]:
