@@ -1,19 +1,14 @@
 <input
-
-type="file"
-
-accept=".pdf"
-
-(change)="select($event)"
-
+  type="file"
+  accept=".pdf"
+  [disabled]="uploading()"
+  (change)="select($event)"
 >
 
 @if(uploading()){
+  <p>Uploading...</p>
+}
 
-<p>
-
-Uploading...
-
-</p>
-
+@if(errorMessage()){
+  <p class="error">{{ errorMessage() }}</p>
 }

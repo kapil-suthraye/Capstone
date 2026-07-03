@@ -1,46 +1,36 @@
-from fastapi import APIRouter
-from fastapi import HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from Backend.app.core.dependencies import get_llm_service, get_nurse_prompt_loader
 from Backend.app.core.logging import logger
+from Backend.app.db.review_store import review_store
 from Backend.app.models.api_models import EvaluateRequest
 from Backend.app.models.evaluation_result import EvaluationResult
-from Backend.app.db.review_store import review_store
 from Backend.app.services.llm_service import LLMService
 from Backend.app.services.nurse_prompts import NursePromptLoader
-from Backend.app.core.config import settings
 
 router = APIRouter(
     prefix="/api",
-    tags=["Evaluation"]
+    tags=["Evaluation"],
 )
 
-loader = NursePromptLoader(
-    settings.NURSE_PROMPTS_FILE
-)
 
-llm = LLMService()
-
-@router.post("/evaluate")
+@router.post("/evaluate", response_model=EvaluationResult)
 async def evaluate(
-    request: EvaluateRequest
+    request: EvaluateRequest,
+    llm: LLMService = Depends(get_llm_service),
+    loader: NursePromptLoader = Depends(get_nurse_prompt_loader),
 ) -> EvaluationResult:
-
-    prompt = loader.get_prompt(
-        request.prompt_id
-    )
+    prompt = loader.get_prompt(request.prompt_id)
 
     if prompt is None:
         raise HTTPException(
             status_code=404,
-            detail="Prompt not found",
+            detail=f"Prompt '{request.prompt_id}' not found",
         )
 
     result = await llm.evaluate(
-
         namespace=request.namespace,
-
         prompt=prompt,
-
     )
 
     review_store.add_evaluation(

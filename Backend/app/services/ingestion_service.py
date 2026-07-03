@@ -1,12 +1,14 @@
-from Backend.app.services.pdf_parser import PDFParser
+from __future__ import annotations
+
+from Backend.app.models.document_chunk import DocumentChunk
 from Backend.app.services.chunking import Chunker
+from Backend.app.services.pdf_parser import PDFParser
 from Backend.app.services.vector_store import VectorStore
 
 
 class IngestionService:
 
-    def __init__(self):
-
+    def __init__(self) -> None:
         self.parser = PDFParser()
         self.chunker = Chunker()
         self.vector = VectorStore()
@@ -15,15 +17,8 @@ class IngestionService:
         self,
         pdf_path: str,
         namespace: str,
-    ):
-
+    ) -> list[DocumentChunk]:
         parsed = self.parser.parse(pdf_path)
-
         chunks = self.chunker.chunk_document(parsed)
-
-        await self.vector.upsert_chunks(
-            chunks,
-            namespace=namespace,
-        )
-
+        await self.vector.upsert_chunks(chunks, namespace=namespace)
         return chunks

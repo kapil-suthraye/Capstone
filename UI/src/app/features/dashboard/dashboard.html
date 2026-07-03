@@ -56,7 +56,17 @@
         </div>
     </div>
 
-    @if(claims().length){
+    @if(loading()){
+        <div class="loading-state">
+            <div class="loader"></div>
+            <p>Loading claims...</p>
+        </div>
+    } @else if(errorMessage()){
+        <div class="error-banner">
+            <span class="material-symbols-rounded">error</span>
+            {{errorMessage()}}
+        </div>
+    } @else if(claims().length){
 
         <table>
 
@@ -115,9 +125,9 @@
                     <td>{{claim.review_date}}</td>
 
                     <td>
-                        <a class="table-action" [routerLink]="['/summary', claim.namespace]">
+                        <button type="button" class="table-action" (click)="viewClaim(claim)">
                             View
-                        </a>
+                        </button>
                     </td>
 
                 </tr>

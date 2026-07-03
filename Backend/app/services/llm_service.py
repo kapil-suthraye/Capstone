@@ -77,7 +77,7 @@ Clinical context:
         self,
         docs: list[RetrievedChunk],
     ) -> str:
-        context = []
+        context = []  # was missing — caused NameError: name 'context' is not defined
 
         for index, doc in enumerate(docs, start=1):
             context.append(
@@ -203,7 +203,7 @@ Pages: {doc.metadata.get("page_start", "-")} - {doc.metadata.get("page_end", "-"
         namespace: str,
         prompts: list[NursePrompt],
     ) -> list[EvaluationResult]:
-        results = []
+        results: list[EvaluationResult] = []  # was missing — caused NameError
 
         for prompt in prompts:
             results.append(
@@ -215,7 +215,7 @@ Pages: {doc.metadata.get("page_start", "-")} - {doc.metadata.get("page_end", "-"
 
         return results
 
-    async def _invoke_with_fallback(self, messages):
+    async def _invoke_with_fallback(self, messages) -> tuple:
         try:
             response = await self.llm.ainvoke(messages)
             return response, self.primary_model, None
