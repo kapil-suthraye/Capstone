@@ -6,11 +6,11 @@ Insurance companies review already-paid claims to make sure providers billed cor
 
 This process is slow and hard to scale because medical records can be over 1,000 pages long. A nurse may review only 4–5 claims per day, while insurers may receive thousands of claims for review daily. This leads to high review costs, slower turnaround, and missed opportunities to detect overpayments or unsupported claims.
 
-Medical AI Reviewer is an AI-powered claim review assistant built on a Retrieval-Augmented Generation (RAG) system. It reads the medical record, finds the most relevant evidence for each claim line item, highlights possible discrepancies, and generates a short evidence-backed summary for the reviewer.
+Medical AI Reviewer is an AI-powered claim review assistant built on an **agentic, evidence-grounded Retrieval-Augmented Generation (RAG) system**. It ingests raw medical-record PDFs, indexes them into a vector database, and evaluates them against a curated library of **nurse-authored InterQual review criteria**. For every criterion it returns a verdict (`valid` / `doubtful` / `insufficient_evidence`), a confidence score, an evidence-grounded justification with page citations, and recommended follow-up actions — all surfaced through an Angular reviewer dashboard.
 
-The goal is to reduce manual reading time and help nurses focus on decision-making instead of searching through documents. The nurse remains the final reviewer, while the AI acts as a first-pass assistant that speeds up the process and improves efficiency.
+The goal is to reduce manual reading time and help nurses focus on decision-making instead of searching through documents. The nurse remains the final reviewer, while the AI acts as a first-pass assistant that speeds up the process and improves efficiency. **Traceability, auditability, and observability are first-class citizens**: every evaluation carries a trace ID, token accounting, latency telemetry, and RAGAS-style retrieval-quality metrics.
 
-**One-line summary:** Medical AI Reviewer helps insurance nurses review claims faster by reading large medical records, finding supporting evidence, and flagging possible discrepancies.
+**One-line summary:** Medical AI Reviewer helps insurance nurses review claims faster by reading large medical records, evaluating them against InterQual criteria, and returning evidence-cited verdicts — while the nurse makes the final call.
 
 ## Problem Statement
 
@@ -22,16 +22,19 @@ The goal is to reduce manual reading time and help nurses focus on decision-maki
 
 ## Proposed Solution
 
-Medical AI Reviewer is a Retrieval-Augmented Generation (RAG) system designed to support post-payment claim review. It reads patient medical records, finds the evidence relevant to each claim, identifies possible discrepancies, and presents a concise summary to the nurse reviewer.
+Medical AI Reviewer is a Retrieval-Augmented Generation (RAG) system designed to support post-payment claim review. It reads patient medical records, retrieves the evidence relevant to each InterQual review criterion, evaluates the criterion with a grounded LLM verdict, and presents an evidence-cited summary to the nurse reviewer.
 
-The goal is to shift the nurse’s role from reading everything manually to reviewing AI-prepared evidence and making the final decision.
+The goal is to shift the nurse's role from reading everything manually to reviewing AI-prepared evidence and making the final decision.
 
 ### What the system does
 
-- Process large medical records efficiently.
-- Extract and highlight relevant evidence for each billed claim item.
-- Identify possible discrepancies in services, codes, dates, units, and documentation.
-- Generate a concise reviewer-friendly summary with evidence citations.
+- Ingests medical-record PDFs with **structure-aware parsing** (font, coordinate, and bold heuristics to reconstruct headings, sections, and tables).
+- Splits records into **clinical-aware chunks** (~700 tokens, 75-token overlap) tagged with diagnoses, medications, lab values, and a clinical-importance score.
+- Embeds and indexes chunks in **Pinecone**, with one namespace per document so evidence never leaks across claims.
+- Retrieves evidence per criterion using **two-stage retrieval**: dense search (top-50) followed by hosted BGE reranking (top-12).
+- Evaluates each criterion with a **grounded GPT-5.5 reviewer** (strict JSON, automatic fallback model) returning verdict, confidence, page-cited justification, and recommended actions.
+- Aggregates per-criterion results into a **claim summary** with high-risk findings, and exposes all reviewed claims on a dashboard.
+- Scores every answer with **RAGAS-style metrics** (faithfulness, answer relevancy, context precision/recall) and records full request/evaluation telemetry.
 
 ## Goals
 
@@ -45,9 +48,10 @@ The goal is to shift the nurse’s role from reading everything manually to revi
 ### Functional Goals
 
 - Ingest and process large medical records.
-- Retrieve relevant evidence for each billed claim item.
-- Flag possible discrepancies in claims and documentation.
-- Generate concise, evidence-backed summaries for nurse reviewers.
+- Retrieve relevant evidence for each InterQual review criterion.
+- Return a normalized verdict with confidence and page-cited justification per criterion.
+- Generate concise, evidence-backed claim summaries for nurse reviewers.
+- Provide full observability: latency (p50/p95), error rates, token usage, verdict distribution, and retrieval-quality metrics.
 
 ## Non-Goals
 
@@ -59,69 +63,69 @@ The goal is to shift the nurse’s role from reading everything manually to revi
 
 ## Feature Definition
 
-| Feature | Description | Priority |
-|---|---|---|
-| Document Upload | Upload medical records and related claim documents in supported formats such as PDF and DOC. | High |
-| OCR Support | Extract text from scanned or image-based medical records. | High |
-| Document Parsing & Chunking | Break large records into structured sections and smaller chunks for processing. | High |
-| Embedding Generation | Convert document chunks into vector embeddings for semantic retrieval. | High |
-| Vector Database | Store embeddings and metadata for fast evidence retrieval. | High |
-| RAG Retrieval | Retrieve the most relevant passages from the medical record for each claim review task. | High |
-| Evidence Extraction | Extract supporting or contradicting evidence related to billed services, codes, dates, and medical necessity. | High |
-| Discrepancy Detection | Identify possible mismatches, missing documentation, unsupported claims, or coding inconsistencies. | High |
-| AI Summary Generation | Generate a concise, evidence-backed summary for the nurse reviewer. | High |
-| Evidence Highlighting & Citations | Show relevant source passages with page-level references for explainability and auditability. | High |
-| Reviewer Dashboard | Display review status, findings, flagged discrepancies, and supporting evidence in one place. | Medium |
-| Reviewer Q&A / Chat | Allow reviewers to ask follow-up questions about the claim or medical record. | Medium |
-| Feedback Loop | Capture reviewer corrections and feedback to improve prompts, rules, or future system performance. | Medium |
-| Audit Logs | Record system actions, retrieved evidence, AI outputs, and reviewer decisions for traceability. | High |
+| Feature | Description | Priority | Status |
+|---|---|---|---|
+| Document Upload | Upload medical-record PDFs via drag-and-drop; parsed, chunked, embedded, and indexed automatically (`POST /api/upload`). | High | ✅ Implemented |
+| Document Parsing & Chunking | Structure-aware pypdf parsing (font/coordinate/bold heuristics) and clinical-aware chunking (~700 tokens, 75 overlap, diagnosis/medication/lab tags, clinical-importance score). | High | ✅ Implemented |
+| Embedding Generation | OpenAI `text-embedding-3-large` (3072-dim), batched. | High | ✅ Implemented |
+| Vector Database | Pinecone serverless index (cosine) with one **namespace per document** for claim isolation; retry/backoff upserts. | High | ✅ Implemented |
+| RAG Retrieval | Two-stage retrieval: dense top-k = 50 followed by hosted `bge-reranker-v2-m3` to top-n = 12. | High | ✅ Implemented |
+| InterQual Criteria Library | Nurse-authored review criteria loaded from the Excel job aid and served via `GET /api/prompts`. | High | ✅ Implemented |
+| Evidence-Grounded Evaluation | GPT-5.5 strict-JSON reviewer (fallback gpt-5.4-mini): verdict (`valid`/`doubtful`/`insufficient_evidence`), confidence, justification, evidence with page citations, follow-up actions. | High | ✅ Implemented |
+| Evidence Highlighting & Citations | Evidence cards with page-level references shown next to an in-browser PDF viewer for explainability and auditability. | High | ✅ Implemented |
+| AI Claim Summary | Aggregated claim summary: overall verdict, confidence, high-risk findings, recommended actions (`GET /api/claims/{namespace}/summary`). | High | ✅ Implemented |
+| Reviewer Dashboard | Angular 22 dashboard: all reviewed claims, stat cards, side-by-side review, upload flow. | Medium | ✅ Implemented |
+| Observability & Metrics | Request tracing middleware, trace IDs, token accounting, latency p50/p95, error rates, verdict distribution, RAGAS metrics (`/api/metrics`, `/api/observability`). | High | ✅ Implemented |
+| RAGAS Evaluation | Deterministic faithfulness, answer-relevancy, context precision/recall, and utilization proxies per answer; production RAGAS against the ground-truth set planned. | High | ✅ Implemented (proxies) |
+
 
 ## Project Type
 
 **Primary Type:** Medical Document Summarizer + Clinical Evidence Recommender
 
-- Summarization of lengthy medical records into concise reviewer-friendly outputs.
-- Recommendation of relevant evidence and discrepancies to help nurse reviewers validate claims faster.
+- Summarization of lengthy medical records into concise reviewer-friendly outputs with per-criterion verdicts.
+- Recommendation of relevant evidence and flagged discrepancies to help nurse reviewers validate claims faster.
+
+This places the system in the category of **AI-augmented decision support** — not autonomous decision-making. The AI prepares, organises, and highlights; the nurse decides.
 
 ## Tech Stack
 
-The following table explains the rationale behind the technology stack selected for the **Medical AI Reviewer** project. The technologies were chosen based on ease of development, AI ecosystem support, scalability, deployment simplicity, and suitability for a Retrieval-Augmented Generation (RAG) application.
+The following table explains the rationale behind the technology stack **implemented** in the Medical AI Reviewer project. Technologies were chosen based on retrieval quality at scale, production-style engineering practice, observability, and suitability for an evidence-grounded RAG application.
 
-| **Layer**                | **Selected Technology**                                   | **Justification**                                                                                                                                                                                                                                                                                                                                  | **Why Not Other Options?**                                                                                                                                                                                                                         |
-| ------------------------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **User Interface**       | **Streamlit**                                             | Streamlit enables rapid development of interactive AI applications with minimal frontend coding. It provides built-in components for file uploads, forms, tables, PDFs, and chat interfaces, making it ideal for internal medical claim review applications.                                                                                       | **React**, **Angular**, and **Vue.js** require separate frontend development, JavaScript expertise, and API integration, increasing development time. **Flask templates** offer limited interactivity.                                             |
-| **Backend**              | **Python + FastAPI**                                      | FastAPI is a modern, high-performance web framework with asynchronous support, automatic API documentation, request validation, and seamless integration with AI libraries such as LangChain and HuggingFace.                                                                                                                                      | **Flask** lacks native asynchronous support and automatic validation. **Django** includes many features unnecessary for an AI-focused application. **Node.js** has a comparatively smaller AI ecosystem.                                           |
-| **Document Processing**  | **PyPDF + OCR (Tesseract)**                               | Medical records often contain both digital PDFs and scanned documents. PyPDF extracts machine-readable text efficiently, while Tesseract OCR converts scanned pages into searchable text, ensuring complete document processing.                                                                                                                   | Using only **PyPDF** cannot process scanned documents. **Apache Tika** is heavier and Java-based, while cloud OCR services introduce additional costs and dependencies.                                                                            |
-| **AI Orchestration**     | **LangChain**                                             | LangChain simplifies the implementation of RAG pipelines by providing reusable components for document loading, chunking, embeddings, retrieval, prompt management, and LLM integration. Its modular architecture also improves maintainability.                                                                                                   | **LlamaIndex** focuses primarily on indexing and retrieval. **Haystack** is more complex to configure for smaller projects. Developing orchestration manually increases development effort and maintenance.                                        |
-| **Embeddings**           | **HuggingFace BGE**                                       | BGE embeddings provide high semantic retrieval accuracy while remaining open source and free to use. They can be executed locally, reducing operational costs and avoiding external API calls for embedding generation.                                                                                                                            | **OpenAI Embeddings** incur API costs and require external requests. **Sentence Transformers** generally provide lower retrieval performance compared to BGE. **Cohere Embeddings** introduce vendor dependency.                                   |
-| **Vector Database**      | **FAISS / ChromaDB**                                      | FAISS delivers fast vector similarity search suitable for local development, while ChromaDB provides persistent vector storage with metadata filtering and easy LangChain integration. Both are lightweight and open source.                                                                                                                       | **Pinecone** is a managed cloud service with recurring costs. **Milvus** and **Weaviate** provide enterprise-scale features but require additional infrastructure that is unnecessary for this project.                                            |
-| **Large Language Model** | **GPT-4o**                                                | GPT-4o provides strong reasoning, summarization, and medical document understanding capabilities. It effectively synthesizes retrieved evidence into concise explanations, improving claim review efficiency and reducing manual effort.                                                                                                           | **Open-source LLMs** require GPU infrastructure and additional optimization. **GPT-3.5** provides weaker reasoning performance. Other proprietary models require additional integrations without significant advantages for this use case.         |
-| **Storage**              | **PostgreSQL**                                            | PostgreSQL is a robust relational database that stores application users, claim metadata, review status, audit logs, and system configurations while ensuring data consistency through ACID compliance.                                                                                                                                            | **MySQL** offers fewer advanced querying capabilities. **MongoDB** is better suited for unstructured data. **SQLite** is not appropriate for concurrent multi-user applications.                                                                   |
-| **Monitoring**           | **LangSmith**                                             | LangSmith provides comprehensive observability for LLM applications, including prompt tracing, retrieval inspection, latency monitoring, debugging, and experiment comparison, making it easier to optimize the RAG pipeline.                                                                                                                      | Infrastructure monitoring tools such as **Prometheus** and **Grafana** do not provide AI workflow tracing. Manual logging lacks detailed prompt-level visibility.                                                                                  |
-| **Evaluation**           | **RAGAS**                                                 | RAGAS is specifically designed to evaluate Retrieval-Augmented Generation systems by measuring answer correctness, faithfulness, context precision, and retrieval quality without requiring extensive manually labeled datasets.                                                                                                                   | Traditional NLP evaluation metrics such as **BLEU**, **ROUGE**, and **Accuracy** evaluate text similarity but cannot effectively assess retrieval quality or hallucinations in RAG systems.                                                        |
-| **Deployment**           | **Docker + Railway**                                      | Docker packages the application and all its dependencies into portable containers, ensuring consistent execution across environments. Railway provides a simple cloud deployment platform with automated builds, environment variable management, HTTPS support, and GitHub integration, making deployment straightforward for a capstone project. | Deploying directly on **AWS**, **Azure**, or **Google Cloud** requires significantly more infrastructure setup, networking, security configuration, and ongoing management. Traditional VPS deployments also require manual server administration. |
-                                                  
+| **Layer** | **Selected Technology** | **Justification** | **Why Not Other Options?** |
+| --- | --- | --- | --- |
+| **User Interface** | **Angular 22 + Angular Material** | A production-grade SPA with standalone components, typed API services, routing, and rich components (PDF viewer, drag-and-drop upload, stat/evidence cards). Enables a real reviewer workflow: dashboard grid, side-by-side PDF review, and claim summaries. | **Streamlit** (originally planned) is excellent for prototypes but limited in customisation, routing, and component reuse for a multi-view reviewer product. **React/Vue** are viable but Angular's batteries-included structure (DI, router, Material) suited a structured dashboard best. |
+| **Backend** | **Python + FastAPI (Uvicorn)** | Modern async framework with automatic OpenAPI docs, Pydantic v2 validation, dependency injection, and middleware hooks used for request-level observability. Native fit with the AI ecosystem. | **Flask** lacks native async and validation. **Django** carries unnecessary weight for an AI-pipeline API. **Node.js** has a smaller AI ecosystem. |
+| **Document Processing** | **pypdf (structure-aware) + tiktoken** | A custom pypdf visitor captures text with font size, font name, coordinates, and bold heuristics, letting the chunker reconstruct headings, sections, and tables; tiktoken enforces token budgets for chunking and cost control. | Plain-text extraction loses the clinical document structure that drives chunk quality. **Unstructured/Tika** are heavier; **OCR (Tesseract)** deferred as a future enhancement since prototype records are digital PDFs. |
+| **Embeddings** | **OpenAI `text-embedding-3-large`** | High retrieval quality at 3072 dimensions, no local GPU/inference infrastructure required, consistent with the OpenAI chat stack, and simple batched API usage. | **HuggingFace BGE** (originally planned) requires local inference resources and a re-embedding pipeline on model updates. BGE is still used where it shines — as the hosted **reranker**. |
+| **Vector Database** | **Pinecone (serverless)** | Managed, persistent vector store with metadata, **namespaces** (one per document — the claim-isolation mechanism), and **hosted `bge-reranker-v2-m3`** reranking, removing the need to host a cross-encoder. | **FAISS/ChromaDB** (originally planned) are in-memory/local, lack managed persistence and hosted reranking, and complicate namespace-style isolation. **Milvus/Weaviate** need extra infrastructure. |
+| **Large Language Model** | **GPT-5.5 (fallback: gpt-5.4-mini)** | Strong reasoning over clinical text, reliable strict-JSON output for verdict/confidence/citations, and an automatic cheaper fallback model for resilience and cost control. | **Open-source LLMs** require GPU infrastructure. Smaller models produce weaker grounded reasoning on 12-chunk clinical contexts. |
+| **Storage** | **In-memory ReviewStore (prototype)** | Fast iteration for a capstone: claims, summaries, and history held in process, exposed via dashboard/summary APIs. Designed as a single seam to swap for a database. | **PostgreSQL** (originally planned) remains the production path; deferred to keep the prototype focused on the RAG pipeline. **SQLite** wouldn't demonstrate the swap-out seam any better. |
+| **Monitoring** | **MetricsRegistry + Loguru (+ optional LangSmith)** | Built-in request middleware assigns request IDs and captures latency; evaluations carry trace IDs, token accounting, verdict distribution, and RAGAS scores — all queryable at `/api/metrics` and `/api/observability`. LangSmith tracing is available via config. | **Prometheus/Grafana** monitor infrastructure, not LLM workflow quality. Relying on LangSmith alone would externalise data and add cost; the in-app registry keeps core telemetry local. |
+| **Evaluation** | **RAGAS-style deterministic proxies** | Faithfulness, answer relevancy, context precision/recall, and utilization computed per answer with zero extra LLM cost, giving continuous retrieval-quality signal. Production RAGAS against `data/gt/ground_truth_all_cases.xlsx` is planned. | **BLEU/ROUGE** measure text similarity, not grounding or retrieval quality. Full RAGAS on every request adds LLM cost/latency; proxies give an always-on signal first. |
+| **Deployment** | **Docker + docker-compose** | Containerised backend and UI with consistent execution across environments; simple local orchestration. | Direct cloud deployment (**AWS/Azure/GCP**) adds infrastructure setup beyond capstone scope; compose keeps the system reproducible anywhere. |
+
 ---
-
 
 ## Test Cases
 
 | Test ID | Scenario | Expected Result |
 |---|---|---|
-| TC-01 | Upload a valid PDF medical record | File is uploaded and processed successfully |
-| TC-02 | Upload a 1000+ page medical record | File is ingested and indexed successfully |
-| TC-03 | Ask a question about a medical record | Relevant evidence is retrieved and returned |
-| TC-04 | Generate a claim review summary | Summary is produced with supporting evidence |
-| TC-05 | Review a claim with inconsistent documentation | Possible discrepancy is detected and highlighted |
-| TC-06 | Upload an invalid or unsupported file | System shows an appropriate error message |
-| TC-07 | Process a record with missing patient or claim data | System shows a warning or incomplete-data flag |
-| TC-08 | Upload multiple records or claims in sequence | System remains stable and processes them successfully |
-| TC-09 | Attempt access with unauthorized credentials | Access is denied |
-| TC-10 | Submit reviewer feedback or correction | Feedback is saved successfully |
+| TC-01 | Upload a valid PDF medical record via `POST /api/upload` | File is parsed, chunked, embedded, and upserted; response contains `document_id`, `namespace`, and chunk count |
+| TC-02 | Upload a very large (1000+ page) medical record | File is ingested and indexed successfully within token budgets |
+| TC-03 | List review criteria via `GET /api/prompts` | All InterQual nurse prompts from the job aid are returned |
+| TC-04 | Evaluate a criterion via `POST /api/evaluate` | Relevant evidence is retrieved and reranked; a normalized verdict with confidence, justification, and page citations is returned |
+| TC-05 | Evaluate a criterion with inconsistent or missing documentation | Verdict of `doubtful` or `insufficient_evidence` is returned with justification rather than a fabricated `valid` |
+| TC-06 | Upload an invalid or unsupported file | System returns an appropriate error message |
+| TC-07 | Request a claim summary via `GET /api/claims/{namespace}/summary` | Aggregated verdict, confidence, high-risk findings, and recommended actions are returned |
+| TC-08 | Upload and evaluate multiple records in sequence | System remains stable; each claim's evidence stays isolated in its own namespace |
+| TC-09 | Primary LLM call fails | System automatically falls back to the fallback model and completes the evaluation |
+| TC-10 | Query `GET /api/metrics` and `GET /api/observability` after evaluations | Latency p50/p95, error rates, token usage, verdict distribution, and RAGAS metrics are reported |
 
 ## Success Metrics
 
 - Reduce average review time per claim by ~70%.
-- Achieve high evidence retrieval accuracy for claim-related queries.
-- Generate responses and summaries within a few seconds.
+- Achieve high evidence retrieval accuracy for claim-related queries (RAGAS context precision/recall).
+- Generate verdicts and summaries within seconds per criterion (tracked at p50/p95).
+- Maintain high groundedness: RAGAS faithfulness on every answer, with page-cited evidence on 100% of verdicts.
 - Improve reviewer satisfaction with usefulness and trust of AI outputs.

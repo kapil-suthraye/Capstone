@@ -4,7 +4,7 @@
 
 The Medical AI Reviewer is a Generative AI-based solution designed to assist insurance companies in validating healthcare claims. Currently, claim validation requires nurses to manually review large medical records, which can contain hundreds or thousands of pages. This process is time-consuming, expensive, and difficult to scale.
 
-The proposed solution leverages Artificial Intelligence to analyze medical records, identify supporting evidence, detect potential discrepancies, and generate concise summaries for nurse review. The nurse remains the final decision maker, ensuring a human-in-the-loop approach.
+The implemented solution is an **agentic, evidence-grounded RAG system** that ingests raw medical-record PDFs, indexes them into a Pinecone vector database, and evaluates them against a curated library of **nurse-authored InterQual review criteria**. For every criterion it returns a verdict (`valid` / `doubtful` / `insufficient_evidence`), a confidence score, an evidence-grounded justification with page citations, and recommended follow-up actions. The nurse remains the final decision maker, ensuring a human-in-the-loop approach.
 
 ---
 
@@ -14,17 +14,19 @@ The proposed solution leverages Artificial Intelligence to analyze medical recor
 Insurance Claim Review
           │
           ▼
-Medical Records
-(PDFs, Lab Reports, Doctor Notes)
+Medical Records (raw PDFs)
+          │  POST /api/upload
+          ▼
+Medical AI Reviewer Platform (FastAPI)
+  Parse ▸ Chunk ▸ Embed ▸ Upsert (Pinecone namespace per document)
+  Retrieve (top-50) ▸ Rerank (BGE, top-12) ▸ LLM Verdict ▸ RAGAS Scoring
           │
           ▼
-Medical AI Reviewer Platform
+Nurse Dashboard (Angular 22)
+  Upload · Dashboard · Side-by-side Review · Claim Summary
           │
           ▼
-Nurse Dashboard
-          │
-          ▼
-Final Decision
+Final Decision (Human-in-the-Loop)
 ```
 
 ---
@@ -39,15 +41,13 @@ This is the starting point of the workflow. The insurance company initiates a re
 
 ### Inputs
 
-* Claim ID
-* Claim Details
-* Procedure Information
-* Diagnosis Information
-* Payment Information
+* Claim medical-record PDF (uploaded via the dashboard)
+* InterQual review criteria (nurse-authored, loaded from the Excel job aid `data/jobaids/nurse_prompts_interqual.xlsx`)
+* A unique `document_id` / Pinecone `namespace` assigned at upload, which scopes all evidence to that claim
 
 ### Business Challenge
 
-A large number of claims require validation daily, creating significant workload for nursing staff.
+A large number of claims require validation daily, creating significant workload for nursing staff. A nurse can review only 4–5 claims per day against thousands received.
 
 ---
 
@@ -70,8 +70,13 @@ Medical records serve as the primary evidence source used to validate claim auth
 ### Challenges
 
 * Records may contain hundreds or thousands of pages.
-* Information is often unstructured.
-* Important evidence may be scattered across multiple documents.
+* Information is often unstructured and layout-heavy (headings, sections, tables).
+* Important evidence may be scattered across the document.
+
+### How the system addresses this
+
+* **Structure-aware parsing** captures font size, font name, coordinates, and bold heuristics to reconstruct document structure, rather than extracting flat text.
+* **Clinical-aware chunking** produces ~700-token, section-scoped chunks (75-token overlap) tagged with diagnoses, medications, lab values, and a clinical-importance score.
 
 ---
 
@@ -79,72 +84,70 @@ Medical records serve as the primary evidence source used to validate claim auth
 
 ### Purpose
 
-The Medical AI Reviewer Platform is the core intelligence layer of the solution. It automates the review process by extracting relevant information from medical records and presenting actionable findings.
+The Medical AI Reviewer Platform is the core intelligence layer of the solution. It automates the review process by extracting relevant evidence from medical records and evaluating each InterQual criterion with a grounded LLM verdict.
 
 ---
 
-### 3.1 Document Processing
+### 3.1 Document Processing (Ingestion)
 
 #### Objective
 
-Convert large medical documents into machine-readable content.
+Convert large medical documents into machine-readable, retrieval-ready content.
 
 #### Activities
 
-* PDF ingestion
-* Text extraction
-* Document cleaning
-* Content preparation
+* PDF ingestion via `POST /api/upload`
+* Structure-aware text extraction (pypdf visitor: text + font + coordinates + bold heuristic)
+* Heading/table detection and section-scoped paragraph building
+* Token-budgeted clinical chunking (tiktoken)
+* Embedding (OpenAI `text-embedding-3-large`, 3072-dim) and upsert into a per-document Pinecone namespace
 
-#### Planned Technologies
+#### Implemented Technologies
 
-* Python
-* PyPDF
-* OCR (Future Enhancement)
-
----
-
-### 3.2 Evidence Extraction
-
-#### Objective
-
-Identify information relevant to claim validation.
-
-#### Examples
-
-* Diagnoses
-* Procedures
-* Treatments
-* Medication Information
-* Dates of Service
-* Clinical Events
-
-#### Planned Technologies
-
-* LangChain
-* HuggingFace Embeddings
-* FAISS Vector Database
+* Python (FastAPI service layer)
+* pypdf, tiktoken
+* OpenAI embeddings, Pinecone
+* OCR — *future enhancement (scanned records are out of scope for the prototype)*
 
 ---
 
-### 3.3 Discrepancy Detection
+### 3.2 Evidence Extraction (Retrieval & Reranking)
 
 #### Objective
 
-Compare claim information against medical evidence and identify potential inconsistencies.
+Identify the passages of the record most relevant to each review criterion.
+
+#### How it works
+
+* Dense similarity search over the claim's Pinecone namespace (`top_k = 50`) for high recall
+* Hosted **BGE reranking** (`bge-reranker-v2-m3`, `top_n = 12`) for precision
+* Retrieved chunks carry page numbers, section context, and clinical tags for citation
+
+#### Implemented Technologies
+
+* Pinecone serverless vector database (cosine, 3072-dim, namespaces)
+* Pinecone-hosted BGE reranker
+* LangChain / LangGraph orchestration scaffolding
+
+---
+
+### 3.3 Discrepancy Detection (LLM Evaluation)
+
+#### Objective
+
+Compare each InterQual criterion against the retrieved medical evidence and identify whether the claim is supported.
 
 #### Example Scenarios
 
-* Procedure claimed but not documented
-* Diagnosis mismatch
-* Service date mismatch
-* Missing supporting evidence
+* Criterion satisfied and clearly documented → `valid`
+* Documentation partially supports the criterion or conflicts → `doubtful`
+* No relevant evidence found in the record → `insufficient_evidence`
 
-#### Planned Technologies
+#### Implemented Technologies
 
-* Large Language Models (LLMs)
-* Python Rule Engine
-* Retrieval-Augmented Generation (RAG)
+* OpenAI **GPT-5.5** reviewer with automatic fallback to **gpt-5.4-mini**
+* Strict-JSON output contract with verdict/confidence normalization
+* Retrieval-Augmented Generation (RAG): the model sees only reranked evidence from the claim's own namespace
 
 ---
 
@@ -156,17 +159,17 @@ Generate a concise nurse-friendly summary containing key findings.
 
 #### Output Includes
 
-* Evidence Found
-* Relevant Diagnoses
-* Relevant Procedures
-* Potential Discrepancies
-* AI Findings Summary
+* Per-criterion verdicts with confidence scores
+* Evidence-grounded justifications with page citations
+* High-risk findings
+* Recommended follow-up actions
+* Claim-level aggregate summary (`GET /api/claims/{namespace}/summary`)
 
-#### Planned Technologies
+#### Implemented Technologies
 
-* GPT-4o / Claude / Llama Models
-* Prompt Engineering
-* LangChain
+* GPT-5.5 (strict-JSON prompting)
+* ReviewStore aggregation (claims, summaries, dashboard views)
+* RAGAS-style scoring per answer (faithfulness, relevancy, context precision/recall)
 
 ---
 
@@ -174,20 +177,25 @@ Generate a concise nurse-friendly summary containing key findings.
 
 ### Purpose
 
-Provide nurses with an easy-to-review summary generated by the AI platform.
+Provide nurses with an easy-to-review, evidence-backed workspace generated by the AI platform.
 
 ### Features
 
-* Review AI Findings
-* View Supporting Evidence
-* Review Discrepancies
-* Validate Recommendations
+* Drag-and-drop PDF upload with progress
+* Dashboard grid of all reviewed claims with stat cards
+* Side-by-side review: source PDF (in-browser viewer) next to AI evidence cards
+* Per-claim summary: overall verdict, high-risk findings, recommended actions
 
 ### Benefits
 
-* Reduces manual effort
-* Improves review efficiency
-* Maintains human oversight
+* Reduces manual reading effort
+* Improves review efficiency and consistency
+* Maintains human oversight — every AI finding is verifiable against the cited page
+
+### Implemented Technologies
+
+* Angular 22 (standalone components, SSR-ready), Angular Material + CDK
+* ngx-extended-pdf-viewer, ngx-file-drop
 
 ---
 
@@ -205,24 +213,27 @@ The final decision remains with the nurse or claim reviewer.
 
 ### Importance
 
-This ensures regulatory compliance and preserves human accountability within the review process.
+This ensures regulatory compliance and preserves human accountability within the review process. The system is explicitly a decision-support prototype — it never auto-adjudicates, and every verdict carries citations so the nurse can verify before acting.
 
 ---
 
-# Planned Technology Stack
+# Implemented Technology Stack
 
-| Layer               | Technology                        |
-| ------------------- | --------------------------------- |
-| Frontend            | Streamlit                         |
-| Backend             | Python                            |
-| Document Processing | PyPDF, OCR                        |
-| Embeddings          | HuggingFace BGE Models            |
-| Vector Database     | FAISS                             |
-| RAG Framework       | LangChain                         |
-| LLM                 | GPT-4o / Claude / Llama           |
-| Observability       | LangSmith                         |
-| Evaluation          | RAGAS                             |
-| Source Documents    | Medical PDFs and Clinical Records |
+| Layer               | Technology                                              |
+| ------------------- | ------------------------------------------------------- |
+| Frontend            | Angular 22 + Angular Material                            |
+| Backend             | Python + FastAPI (Uvicorn)                               |
+| Document Processing | pypdf (structure-aware), tiktoken                        |
+| Embeddings          | OpenAI `text-embedding-3-large` (3072-dim)               |
+| Vector Database     | Pinecone serverless (cosine, namespace per document)     |
+| Reranking           | Pinecone-hosted `bge-reranker-v2-m3`                     |
+| RAG Framework       | LangChain / LangGraph                                    |
+| LLM                 | OpenAI GPT-5.5 (fallback: gpt-5.4-mini)                  |
+| Observability       | MetricsRegistry + Loguru (+ optional LangSmith tracing)  |
+| Evaluation          | RAGAS-style deterministic proxies                        |
+| Criteria Source     | InterQual nurse prompts (Excel job aid, via openpyxl)    |
+| Review Storage      | In-memory ReviewStore (prototype)                        |
+| Deployment          | Docker + docker-compose                                  |
 
 ---
 
@@ -233,10 +244,11 @@ This ensures regulatory compliance and preserves human accountability within the
 * Improved scalability
 * Lower operational costs
 * Faster identification of discrepancies
-* Improved claim validation accuracy
+* Improved claim validation accuracy and consistency
+* Full traceability: trace IDs, token accounting, latency telemetry, and retrieval-quality metrics on every evaluation
 
 ---
 
 ## Conclusion
 
-The Medical AI Reviewer aims to augment healthcare claim reviewers by automating document analysis and evidence discovery. By combining AI-powered retrieval and summarization with human validation, the solution can significantly improve review efficiency while maintaining trust, compliance, and accountability.
+The Medical AI Reviewer augments healthcare claim reviewers by automating document analysis and evidence discovery. By combining structure-aware ingestion, two-stage retrieval, grounded LLM verdicts, and built-in observability with human validation, the solution significantly improves review efficiency while maintaining trust, compliance, and accountability.
