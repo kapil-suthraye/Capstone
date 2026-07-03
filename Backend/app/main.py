@@ -29,14 +29,8 @@ if __name__ == "__main__":
     uvicorn.run(
         "Backend.app.main:app",
         host="0.0.0.0",
-        port=int(os.getenv("PORT", 8000))
+        port=int(os.getenv("PORT", 8000)),
     )
-
-cors_origins = [
-    origin.strip()
-    for origin in settings.CORS_ORIGINS.split(",")
-    if origin.strip()
-]
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,12 +53,14 @@ async def request_observability_middleware(
         response = await call_next(request)
     except Exception:
         latency_ms = round((perf_counter() - started) * 1000, 2)
-        metrics.observe_request(
-            method=request.method,
-            path=request.url.path,
-            status_code=500,
-            latency_ms=latency_ms,
-        )
+        _EXCLUDED_PATHS = {"/api/observability", "/api/metrics"}
+        if request.url.path not in _EXCLUDED_PATHS:
+            metrics.observe_request(
+                method=request.method,
+                path=request.url.path,
+                status_code=500,
+                latency_ms=latency_ms,
+            )
         logger.bind(
             request_id=request_id,
             method=request.method,
@@ -74,12 +70,18 @@ async def request_observability_middleware(
         raise
 
     latency_ms = round((perf_counter() - started) * 1000, 2)
-    metrics.observe_request(
-        method=request.method,
-        path=request.url.path,
-        status_code=response.status_code,
-        latency_ms=latency_ms,
-    )
+
+    # Exclude polling/observability endpoints from the Total Requests counter
+    # so that the 30-second auto-refresh from the UI does not inflate the metric.
+    _EXCLUDED_PATHS = {"/api/observability", "/api/metrics"}
+    if request.url.path not in _EXCLUDED_PATHS:
+        metrics.observe_request(
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            latency_ms=latency_ms,
+        )
+
     response.headers["x-request-id"] = request_id
 
     logger.bind(

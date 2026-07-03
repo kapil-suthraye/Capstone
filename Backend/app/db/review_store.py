@@ -86,11 +86,37 @@ class ReviewStore:
 
     def get_claim(self, namespace: str) -> ClaimRecord | None:
         with self._lock:
-            return self._claims.get(namespace)
+            record = self._claims.get(namespace)
+            if record is None:
+                return None
+            # Return a shallow copy so callers cannot mutate the internal record.
+            # evaluations list is copied; individual EvaluationResult objects are
+            # Pydantic models and are effectively immutable via normal use.
+            return ClaimRecord(
+                document_id=record.document_id,
+                namespace=record.namespace,
+                filename=record.filename,
+                pdf_path=record.pdf_path,
+                created_at=record.created_at,
+                last_updated=record.last_updated,
+                evaluations=list(record.evaluations),
+            )
 
     def list_dashboard_claims(self) -> list[dict[str, Any]]:
         with self._lock:
-            claims = list(self._claims.values())
+            # Deep-copy only what we need to avoid holding the lock during computation
+            snapshots = [
+                ClaimRecord(
+                    document_id=r.document_id,
+                    namespace=r.namespace,
+                    filename=r.filename,
+                    pdf_path=r.pdf_path,
+                    created_at=r.created_at,
+                    last_updated=r.last_updated,
+                    evaluations=list(r.evaluations),
+                )
+                for r in self._claims.values()
+            ]
 
         return [
             {
@@ -103,26 +129,43 @@ class ReviewStore:
                 "confidence": self._average_confidence(record.evaluations),
                 "reviewed_criteria": len(record.evaluations),
                 "review_date": record.last_updated[:10],
+                "filename": record.filename,
+                "pdf_path": record.pdf_path,
             }
-            for record in claims
+            for record in snapshots
         ]
 
     def build_summary(self, namespace: str) -> ClaimSummary | None:
         with self._lock:
             record = self._claims.get(namespace)
+            if record is None:
+                return None
+            # Snapshot all mutable state under the lock before releasing it.
+            evaluations = list(record.evaluations)
+            claim_id = record.claim_id
+            record_namespace = record.namespace
+            filename = record.filename
+            pdf_path = record.pdf_path
+            created_at = record.created_at
+            last_updated = record.last_updated
 
-        if record is None:
-            return None
-
-        evaluations = record.evaluations
         valid_count = sum(1 for item in evaluations if item.verdict == "valid")
         insufficient_count = sum(
-            1
-            for item in evaluations
-            if item.verdict == "insufficient_evidence"
+            1 for item in evaluations if item.verdict == "insufficient_evidence"
         )
         doubtful_count = len(evaluations) - valid_count - insufficient_count
-        verdict = self._claim_verdict(record)
+
+        # Build a temporary record snapshot for the helper methods
+        _snap = ClaimRecord(
+            document_id=record_namespace,
+            namespace=record_namespace,
+            filename=filename,
+            pdf_path=pdf_path,
+            created_at=created_at,
+            last_updated=last_updated,
+            evaluations=evaluations,
+        )
+        verdict = self._claim_verdict(_snap)
         confidence = self._average_confidence(evaluations)
         ragas_metrics = self._average_ragas(evaluations)
 
@@ -135,11 +178,11 @@ class ReviewStore:
         recommended_actions = self._recommended_actions(evaluations, verdict)
 
         return ClaimSummary(
-            claim_id=record.claim_id,
-            namespace=record.namespace,
-            filename=record.filename,
-            pdf_path=record.pdf_path,
-            status=self._status_label(record),
+            claim_id=claim_id,
+            namespace=record_namespace,
+            filename=filename,
+            pdf_path=pdf_path,
+            status=self._status_label(_snap),
             verdict=verdict,
             final_summary=self._final_summary(
                 verdict=verdict,
@@ -155,8 +198,8 @@ class ReviewStore:
             recommended_actions=recommended_actions,
             ragas_metrics=ragas_metrics,
             evaluation_results=evaluations,
-            created_at=record.created_at,
-            last_updated=record.last_updated,
+            created_at=created_at,
+            last_updated=last_updated,
         )
 
     def ragas_snapshot(self) -> dict[str, float]:

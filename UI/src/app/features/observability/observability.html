@@ -1,0 +1,288 @@
+<div class="observability-page">
+  <header class="page-header">
+    <div>
+      <div class="header-badge">
+        <span class="material-symbols-rounded">monitoring</span>
+        <span>Live Metrics</span>
+      </div>
+      <h1>Observability Dashboard</h1>
+      <p>
+        Real-time system health, evaluation metrics, and RAGAS-quality scores.
+        Automatically refreshes every 30 seconds.
+      </p>
+    </div>
+
+    <button type="button" class="refresh-btn" (click)="refresh()" [disabled]="loading()">
+      <span class="material-symbols-rounded">refresh</span>
+      Refresh
+    </button>
+  </header>
+
+  @if(lastRefreshed()){
+  <div class="refresh-info">
+    Last refreshed: <strong>{{ lastRefreshed() | date: 'short' }}</strong>
+  </div>
+  } @if(!backendReachable()){
+  <div class="backend-warn">
+    <span class="material-symbols-rounded">wifi_off</span>
+    Backend unreachable — metrics could not be refreshed. Retrying in 30 s.
+  </div>
+  } @if(loading() && !snapshot()){
+  <div class="loading-state">
+    <div class="loader"></div>
+    <p>Loading observability metrics...</p>
+  </div>
+  } @else if(snapshot()){
+
+  <!-- System Metrics -->
+  <section class="metrics-section">
+    <div class="section-heading">
+      <span class="material-symbols-rounded">speed</span>
+      <div>
+        <h2>System & Traffic Metrics</h2>
+        <p>API requests, error rates, and latency percentiles.</p>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      @for(card of systemCards(); track card.label){
+      <article class="metric-card" [class]="'trend-' + (card.trend || 'neutral')">
+        <div class="metric-icon">
+          <span class="material-symbols-rounded">{{ card.icon }}</span>
+        </div>
+        <div class="metric-body">
+          <p class="metric-label">{{ card.label }}</p>
+          <p class="metric-value">
+            {{ card.value }} <span class="metric-unit">{{ card.unit || '' }}</span>
+          </p>
+          <p class="metric-desc">{{ card.description }}</p>
+        </div>
+      </article>
+      }
+    </div>
+  </section>
+
+  <!-- Verdict Distribution -->
+  <section class="metrics-section">
+    <div class="section-heading">
+      <span class="material-symbols-rounded">pie_chart</span>
+      <div>
+        <h2>Verdict Distribution</h2>
+        <p>Breakdown of review outcomes across all evaluated claims.</p>
+      </div>
+    </div>
+
+    <div class="verdict-bar-wrapper">
+      <div class="verdict-bar">
+        @for(segment of verdictSegments(); track segment.label){
+        <div
+          class="verdict-segment"
+          [style.width.%]="segment.pct"
+          [style.background-color]="segment.color"
+          [title]="segment.label + ': ' + segment.value + ' (' + segment.pct.toFixed(1) + '%)'"
+        ></div>
+        }
+      </div>
+
+      <div class="verdict-legend">
+        @for(segment of verdictSegments(); track segment.label){
+        <div class="legend-item">
+          <span class="legend-dot" [style.background-color]="segment.color"></span>
+          <span class="legend-label"
+            >{{ segment.label }}: <strong>{{ segment.value }}</strong> ({{
+              segment.pct.toFixed(1)
+            }}%)</span
+          >
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- RAGAS Metrics -->
+  <section class="metrics-section">
+    <div class="section-heading">
+      <span class="material-symbols-rounded">analytics</span>
+      <div>
+        <h2>Avg RAGAS Quality Metrics</h2>
+        <p>
+          Average Retrieval-Augmented Generation Assessment scores across all evaluations:
+          faithfulness, relevancy, precision, recall, and utilisation.
+        </p>
+      </div>
+    </div>
+
+    @if(ragasEntries().length > 0){
+    <div class="ragas-grid">
+      @for(entry of ragasEntries(); track entry.key){
+      <article class="ragas-card">
+        <div class="ragas-header">
+          <h3>{{ entry.label }}</h3>
+          <span class="ragas-score" [style.color]="gaugeColor(entry.value)">{{
+            entry.value | number: '1.0-3'
+          }}</span>
+        </div>
+
+        <div class="ragas-gauge">
+          <div
+            class="ragas-gauge-fill"
+            [style.width]="gaugeWidth(entry.value)"
+            [style.background-color]="gaugeColor(entry.value)"
+          ></div>
+        </div>
+
+        <p class="ragas-desc">{{ entry.desc }}</p>
+      </article>
+      }
+    </div>
+    } @else {
+    <div class="empty-state">
+      <span class="material-symbols-rounded">sentiment_neutral</span>
+      <p>No RAGAS metrics yet — evaluate a few claims to see quality scores here.</p>
+    </div>
+    }
+  </section>
+
+  <!-- Model Usage -->
+  <section class="metrics-section">
+    <div class="section-heading">
+      <span class="material-symbols-rounded">model_training</span>
+      <div>
+        <h2>LLM Model Usage</h2>
+        <p>Distribution of calls across primary and fallback reviewer models.</p>
+      </div>
+    </div>
+
+    @if(modelEntries().length > 0){
+    <div class="model-list">
+      @for(entry of modelEntries(); track entry.model){
+      <div class="model-row">
+        <span class="model-name">{{ entry.model }}</span>
+        <span class="model-count">{{ entry.count }} calls</span>
+      </div>
+      }
+    </div>
+    } @else {
+    <div class="empty-state">
+      <span class="material-symbols-rounded">sentiment_neutral</span>
+      <p>No model usage recorded yet.</p>
+    </div>
+    }
+  </section>
+
+  <!-- Recent Claims -->
+  <section class="metrics-section">
+    <div class="section-heading">
+      <span class="material-symbols-rounded">summarize</span>
+      <div>
+        <h2>Recent Claims</h2>
+        <p>Latest evaluated claims with verdict, confidence, and review date.</p>
+      </div>
+    </div>
+
+    @if(recentClaims().length > 0){
+    <div class="claims-table-wrapper">
+      <table class="claims-table">
+        <thead>
+          <tr>
+            <th>Claim ID</th>
+            <th>Diagnosis</th>
+            <th>Verdict</th>
+            <th>Confidence</th>
+            <th>Criteria</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(claim of recentClaims(); track claim.namespace){
+          <tr>
+            <td>
+              <strong>{{ claim.claim_id }}</strong>
+            </td>
+            <td>{{ claim.diagnosis }}</td>
+            <td>
+              <span [class]="'verdict-badge ' + verdictClass(claim.verdict)">{{
+                claim.verdict
+              }}</span>
+            </td>
+            <td>{{ claim.confidence }}%</td>
+            <td>{{ claim.reviewed_criteria }}</td>
+            <td>{{ claim.review_date }}</td>
+            <td>
+              <button
+                type="button"
+                class="view-link"
+                title="View full summary"
+                (click)="viewClaim(claim)"
+              >
+                <span class="material-symbols-rounded">open_in_new</span>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="empty-state">
+      <span class="material-symbols-rounded">sentiment_neutral</span>
+      <p>No claims evaluated yet — upload a medical record to begin.</p>
+    </div>
+    }
+  </section>
+
+  <!-- Metric Explanations -->
+  <section class="metrics-section explanations">
+    <div class="section-heading">
+      <span class="material-symbols-rounded">help_outline</span>
+      <div>
+        <h2>Metric Explanations</h2>
+        <p>Definitions and usage guidance for the metrics displayed above.</p>
+      </div>
+    </div>
+
+    <div class="explanation-grid">
+      <article class="explanation-card">
+        <h3>Request Latency</h3>
+        <p>
+          <strong>Avg</strong> is the arithmetic mean. <strong>P95</strong> indicates that 95 % of
+          requests complete faster than this threshold — a better indicator of user-perceived
+          performance. A P95 under 500 ms is considered excellent for interactive workflows.
+        </p>
+      </article>
+
+      <article class="explanation-card">
+        <h3>Error Rate</h3>
+        <p>
+          The ratio of 5xx server errors to total requests. A healthy system runs at &lt; 1 %.
+          Transient spikes are normal, but sustained elevated error rates indicate backend
+          instability and warrant investigation.
+        </p>
+      </article>
+
+      <article class="explanation-card">
+        <h3>RAGAS Scores</h3>
+        <p>
+          <strong>Faithfulness</strong> checks factual grounding. <strong>Relevancy</strong> checks
+          answer alignment with the question. <strong>Precision</strong> and
+          <strong>Recall</strong> measure retrieval quality. <strong>Utilisation</strong> checks
+          whether the model actually used the retrieved context. All metrics range from 0 (worst)
+          to 1 (best).
+        </p>
+      </article>
+
+      <article class="explanation-card">
+        <h3>Verdict Distribution</h3>
+        <p>
+          <strong>Valid</strong>: criterion is met with high confidence.
+          <strong>Doubtful</strong>: evidence is weak or conflicting; requires manual review.
+          <strong>Insufficient Evidence</strong>: no relevant documentation found. This
+          distribution helps spot documentation gaps and recurring review bottlenecks.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  }
+</div>

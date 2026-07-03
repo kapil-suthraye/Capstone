@@ -1,25 +1,12 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-workflow-stepper',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './workflow-stepper.html',
-  styleUrls: ['./workflow-stepper.scss']
+  styleUrls: ['./workflow-stepper.scss'],
 })
 export class WorkflowStepperComponent {
-
-  steps = [
-
-    'Upload PDF',
-
-    'AI Review',
-
-    'Evidence',
-
-    'Suggestion'
-
-  ];
-
+  steps = ['Upload PDF', 'AI Review', 'Evidence', 'Suggestion'];
 }

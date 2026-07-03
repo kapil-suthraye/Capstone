@@ -1,73 +1,39 @@
-import {
-
-Component,
-
-inject,
-
-signal
-
-} from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { UploadService } from '../../../core/services/upload';
 
 @Component({
-
   selector: 'app-upload-card',
-
   standalone: true,
-
   templateUrl: './upload-card.html',
-
-  styleUrl: './upload-card.scss'
-
+  styleUrl: './upload-card.scss',
 })
+export class UploadCardComponent {
+  private readonly service = inject(UploadService);
+  private readonly destroyRef = inject(DestroyRef);
 
-export class UploadComponent{
+  uploading = signal(false);
+  errorMessage = signal('');
 
-private service=inject(
+  select(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
 
-UploadService
+    if (!file || this.uploading()) return;
 
-);
+    this.uploading.set(true);
+    this.errorMessage.set('');
 
-uploading=signal(false);
-
-select(
-
-event:any
-
-){
-
-const file=
-
-event.target.files[0];
-
-if(!file)
-
-return;
-
-this.uploading.set(true);
-
-this.service
-
-.upload(file)
-
-.subscribe({
-
-next:()=>{
-
-this.uploading.set(false);
-
-},
-
-error:()=>{
-
-this.uploading.set(false);
-
-}
-
-});
-
-}
-
+    this.service
+      .upload(file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.uploading.set(false),
+        error: () => {
+          this.errorMessage.set('Upload failed. Please try again.');
+          this.uploading.set(false);
+        },
+      });
+  }
 }

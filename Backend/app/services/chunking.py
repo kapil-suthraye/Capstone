@@ -752,37 +752,150 @@ class Chunker:
 
         text = text.lower()
 
+        # IMPORTANT: Keywords are checked in order from top to bottom.
+        # Place LONGEST, MOST SPECIFIC phrases first to avoid false positives.
+        # Avoid generic symptoms (e.g., "chest pain", "acute") that appear across many diagnoses.
         diagnosis_map = {
 
-            "heart failure": "CHF",
+            # === Specific multi-word phrases first (highest priority) ===
 
+            # Community-Acquired Pneumonia (specific)
+            "community-acquired pneumonia": "PNEUMONIA",
+            "community acquired pneumonia": "PNEUMONIA",
+
+            # COPD Exacerbation (specific)
+            "acute exacerbation of copd": "COPD",
+            "copd exacerbation": "COPD",
+            "aecopd": "COPD",
+            "acute exacerbation copd": "COPD",
+
+            # CHF specific phrases
             "congestive heart failure": "CHF",
+            "acute decompensated heart failure": "CHF",
+            "systolic heart failure": "CHF",
+            "diastolic heart failure": "CHF",
+            "left ventricular failure": "CHF",
+            "right ventricular failure": "CHF",
+            "biventricular failure": "CHF",
+            "reduced ejection fraction": "CHF",
+            "preserved ejection fraction": "CHF",
+            "acute heart failure": "CHF",
+            "chronic heart failure": "CHF",
+            "decompensated heart": "CHF",
 
+            # Stroke specific phrases
+            "ischemic stroke": "STROKE",
+            "transient ischemic attack": "STROKE",
+            "cerebrovascular accident": "STROKE",
+            "cerebral infarction": "STROKE",
+            "brain infarction": "STROKE",
+            "cerebral ischemia": "STROKE",
+            "embolic stroke": "STROKE",
+            "thrombotic stroke": "STROKE",
+
+            # NSTEMI specific phrases
+            "non-st elevation myocardial infarction": "NSTEMI",
+            "non st elevation": "NSTEMI",
+            "acute coronary syndrome": "NSTEMI",
+            "myocardial infarction": "NSTEMI",
+            "unstable angina": "NSTEMI",
+            "troponin elevation": "NSTEMI",
+            "elevated troponin": "NSTEMI",
+
+            # Pulmonary Embolism specific phrases
+            "pulmonary embolism": "PE",
+            "pulmonary embolus": "PE",
+            "deep vein thrombosis": "PE",
+            "venous thromboembolism": "PE",
+            "pulmonary thromboembolism": "PE",
+
+            # Sepsis specific phrases
+            "septic shock": "SEPSIS",
+            "severe sepsis": "SEPSIS",
+            "systemic inflammatory response": "SEPSIS",
+            "systemic infection": "SEPSIS",
+
+            # COVID specific phrases
+            "covid-19": "COVID",
+            "covid 19": "COVID",
+            "sars-cov-2": "COVID",
+            "novel coronavirus": "COVID",
+
+            # COPD specific phrases
+            "chronic obstructive pulmonary disease": "COPD",
+            "chronic obstructive pulmonary": "COPD",
+            "chronic obstructive": "COPD",
+            "chronic bronchitis": "COPD",
+            "obstructive lung disease": "COPD",
+            "obstructive airway": "COPD",
+            "chronic airway obstruction": "COPD",
+            "hypercapnic respiratory": "COPD",
+
+            # === Shorter / more generic terms (lower priority) ===
+
+            "heart failure": "CHF",
+            "cardiac failure": "CHF",
+            "cardiomyopathy": "CHF",
+            "adhf": "CHF",
+            "hfref": "CHF",
+            "hfpef": "CHF",
             "chf": "CHF",
 
-            "copd": "COPD",
-
             "pneumonia": "PNEUMONIA",
+            "lower respiratory infection": "PNEUMONIA",
+            "lung infection": "PNEUMONIA",
+            "bacterial pneumonia": "PNEUMONIA",
+            "viral pneumonia": "PNEUMONIA",
+            "aspiration pneumonia": "PNEUMONIA",
+            "lobar pneumonia": "PNEUMONIA",
+            "pneumonitis": "PNEUMONIA",
 
             "sepsis": "SEPSIS",
+            "septicemia": "SEPSIS",
+            "bacteremia": "SEPSIS",
+            "septic": "SEPSIS",
+
+            "copd": "COPD",
+            "emphysema": "COPD",
+
+            "nstemi": "NSTEMI",
+            "acute coronary": "NSTEMI",
+            "heart attack": "NSTEMI",
+            "ischemic heart": "NSTEMI",
+            "acute mi": "NSTEMI",
+            "angina": "NSTEMI",
+            "acs": "NSTEMI",
+            "ami": "NSTEMI",
+            "ua": "NSTEMI",
 
             "stroke": "STROKE",
-
+            "cerebrovascular": "STROKE",
+            "brain attack": "STROKE",
             "cva": "STROKE",
+            "tia": "STROKE",
 
+            "covid": "COVID",
+            "covid19": "COVID",
+            "coronavirus": "COVID",
+            "2019-ncov": "COVID",
+
+            "dvt": "PE",
+            "vte": "PE",
+            "blood clot": "PE",
+            "thromboembolism": "PE",
+
+            # === Non-workbook diagnoses (generic fallback) ===
             "diabetes": "DIABETES",
-
             "diabetic": "DIABETES",
-
+            "hyperglycemia": "DIABETES",
             "hypertension": "HTN",
-
+            "high blood pressure": "HTN",
             "htn": "HTN",
-
-            "kidney injury": "AKI",
-
             "acute kidney injury": "AKI",
-
-            "aki": "AKI"
+            "kidney injury": "AKI",
+            "renal failure": "AKI",
+            "acute renal": "AKI",
+            "aki": "AKI",
 
         }
 
@@ -850,36 +963,25 @@ class Chunker:
     def detect_lab_values(
         self,
         text: str,
-    ):
-
+    ) -> list[str]:
+        # Non-capturing groups (?:...) ensure re.findall returns the full
+        # match string instead of just the captured sub-group.
         patterns = [
-
-            r"hgb[: ]+\d+(\.\d+)?",
-
-            r"wbc[: ]+\d+(\.\d+)?",
-
-            r"platelet[s]?[: ]+\d+",
-
-            r"creatinine[: ]+\d+(\.\d+)?",
-
+            r"hgb[: ]+\d+(?:\.\d+)?",
+            r"wbc[: ]+\d+(?:\.\d+)?",
+            r"platelets?[: ]+\d+",
+            r"creatinine[: ]+\d+(?:\.\d+)?",
             r"bun[: ]+\d+",
-
             r"sodium[: ]+\d+",
-
-            r"potassium[: ]+\d+(\.\d+)?",
-
-            r"glucose[: ]+\d+"
-
+            r"potassium[: ]+\d+(?:\.\d+)?",
+            r"glucose[: ]+\d+",
         ]
 
-        found = []
-
+        found: list[str] = []
         lower = text.lower()
 
         for pattern in patterns:
-
             matches = re.findall(pattern, lower)
-
             found.extend(matches)
 
         return found

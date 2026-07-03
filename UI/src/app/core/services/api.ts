@@ -1,79 +1,35 @@
 import { Injectable, inject } from '@angular/core';
-
-import {
-
-HttpClient,
-
-HttpHeaders
-
-} from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { UploadResponse } from '../models/upload-response';
 
-@Injectable({
+@Injectable({ providedIn: 'root' })
+export class ApiService {
+  private readonly http = inject(HttpClient);
 
-providedIn:'root'
+  // Both environments now declare apiUrl with the /api prefix.
+  // This single source of truth avoids double-prefixing.
+  private readonly baseUrl = environment.apiUrl;
 
-})
+  get<T>(endpoint: string): Observable<T> {
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}`);
+  }
 
-export class ApiService{
+  /** GET with explicit query parameters */
+  getWithParams<T>(endpoint: string, params: HttpParams): Observable<T> {
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, { params });
+  }
 
-private http=inject(HttpClient);
+  /** body typed as unknown — callers must pass a typed value, not any */
+  post<T>(endpoint: string, body: unknown): Observable<T> {
+    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body);
+  }
 
-private url=environment.apiUrl;
-
-get<T>(endpoint:string){
-
-return this.http.get<T>(
-
-`${this.url}/${endpoint}`
-
-);
-
-}
-
-post<T>(
-
-endpoint:string,
-
-body:any
-
-){
-
-return this.http.post<T>(
-
-`${this.url}/${endpoint}`,
-
-body
-
-);
-
-}
-
-upload(
-
-file:File
-
-){
-
-const form=new FormData();
-
-form.append(
-
-'file',
-
-file
-
-);
-
-return this.http.post(
-
-`${this.url}/upload`,
-
-form
-
-);
-
-}
-
+  upload(file: File): Observable<UploadResponse> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<UploadResponse>(`${this.baseUrl}/upload`, form);
+  }
 }

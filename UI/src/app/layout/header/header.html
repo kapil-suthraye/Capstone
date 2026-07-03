@@ -1,44 +1,19 @@
 <header>
 
-<div>
+  <div class="header-title">
+    <h2>{{ title() }}</h2>
+    <p>{{ subtitle() }}</p>
+  </div>
 
-<h2>
+  <div class="actions">
+    <button
+      type="button"
+      aria-label="Notifications"
+      class="icon-button">
+      <span class="material-symbols-rounded">notifications</span>
+    </button>
 
-{{title()}}
-
-</h2>
-
-<p>
-
-{{subtitle()}}
-
-</p>
-
-</div>
-
-<div class="actions">
-
-<input
-placeholder="Search claims..."
-
->
-
-<button>
-
-<span class="material-symbols-rounded">
-
-notifications
-
-</span>
-
-</button>
-
-<div class="avatar">
-
-MR
-
-</div>
-
-</div>
+    <div class="avatar" aria-hidden="true">MR</div>
+  </div>
 
 </header>

@@ -5,11 +5,18 @@ from Backend.app.models.retrieved_chunk import RetrievedChunk
 
 
 class RagasService:
-    """RAGAS-compatible metric facade.
+    """Deterministic proxy scoring facade.
 
-    The production RAGAS package can be connected here when curated ground truth
-    is available. Until then, these deterministic proxy scores keep observability
-    stable and make low-evidence answers visible to reviewers.
+    These scores use term-overlap heuristics to approximate RAGAS metrics and
+    keep observability stable before ground-truth data is available.
+
+    ``scoring_method`` is set to ``"proxy"`` on every result so consumers can
+    distinguish these from real RAGAS scores produced by the ragas package.
+
+    To replace with production RAGAS:
+      1. Install the ``ragas`` package.
+      2. Replace the body of ``score()`` with calls to the RAGAS evaluators.
+      3. Update ``scoring_method`` to ``"ragas"``.
     """
 
     def score(
@@ -23,12 +30,13 @@ class RagasService:
     ) -> RagasMetrics:
         if not contexts:
             return RagasMetrics(
+                scoring_method="proxy",
                 faithfulness=0,
                 answer_relevancy=0,
                 context_precision=0,
                 context_recall=0,
                 context_utilization=0,
-                notes="No retrieved context was available for RAGAS scoring.",
+                notes="No retrieved context was available for proxy scoring.",
             )
 
         question_terms = self._terms(question)
@@ -42,6 +50,7 @@ class RagasService:
         confidence_factor = max(0, min(confidence / 100, 1))
 
         return RagasMetrics(
+            scoring_method="proxy",
             faithfulness=round((overlap_with_context * 0.7) + (confidence_factor * 0.3), 3),
             answer_relevancy=round(overlap_with_question, 3),
             context_precision=round(context_question_overlap, 3),
@@ -59,5 +68,4 @@ class RagasService:
     def _overlap(self, left: set[str], right: set[str]) -> float:
         if not left or not right:
             return 0
-
         return len(left & right) / len(left)

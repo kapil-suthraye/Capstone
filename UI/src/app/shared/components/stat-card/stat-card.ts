@@ -1,24 +1,18 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-stat-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [MatCardModule, NgClass],
   templateUrl: './stat-card.html',
-  styleUrls: ['./stat-card.scss']
+  styleUrls: ['./stat-card.scss'],
 })
 export class StatCardComponent {
-
   @Input() title = '';
-
   @Input() value = '';
-
   @Input() subtitle = '';
-
   @Input() icon = 'description';
-
   @Input() color: 'blue' | 'pink' = 'blue';
-
 }

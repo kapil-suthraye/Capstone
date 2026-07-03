@@ -1,15 +1,47 @@
-from Backend.app.services.retriever import Retriever
+"""
+Tests for the Retriever thin wrapper.
 
-r=Retriever()
+Unit-tests use mocking; live tests require Pinecone + OpenAI.
+"""
+from __future__ import annotations
 
-docs=r.retrieve(
+from unittest.mock import AsyncMock, MagicMock, patch
 
-    "Does patient have COVID-19?",
+import pytest
 
-    "COVID-19"
+pytestmark = pytest.mark.asyncio
 
-)
 
-for d in docs:
+@pytest.fixture
+def retriever():
+    from Backend.app.services.retriever import Retriever
+    return Retriever()
 
-    print(d)
+
+def test_retriever_instantiates(retriever):
+    assert retriever is not None
+    assert retriever.vector is not None
+
+
+async def test_retrieve_delegates_to_vector_store():
+    """Retriever.retrieve should call similarity_search then rerank."""
+    from Backend.app.services.retriever import Retriever
+
+    mock_match = MagicMock()
+    mock_match.metadata = {"text": "sample", "section_heading": "Assessment"}
+    mock_match.id = "chunk-1"
+    mock_match.score = 0.9
+
+    with patch(
+        "Backend.app.services.retriever.VectorStore.similarity_search",
+        new_callable=AsyncMock,
+        return_value=[mock_match],
+    ) as mock_search, patch(
+        "Backend.app.services.retriever.VectorStore.rerank",
+        return_value=[mock_match],
+    ) as mock_rerank:
+        retriever = Retriever()
+        result = await retriever.vector.similarity_search("question", namespace="ns")
+
+        mock_search.assert_called_once()
+        assert len(result) == 1

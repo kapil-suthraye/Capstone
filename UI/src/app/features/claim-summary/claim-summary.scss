@@ -2,6 +2,22 @@
   display:flex;
   flex-direction:column;
   gap:18px;
+  height:calc(100vh - 134px);
+  overflow-y:auto;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:#cbd5e1 transparent;
+}
+
+.summary-page::-webkit-scrollbar{
+  width:6px;
+}
+.summary-page::-webkit-scrollbar-track{
+  background:transparent;
+}
+.summary-page::-webkit-scrollbar-thumb{
+  background:#cbd5e1;
+  border-radius:3px;
 }
 
 .summary-hero,

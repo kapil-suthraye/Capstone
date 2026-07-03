@@ -45,14 +45,13 @@ menu = signal([
     icon: 'summarize',
     title: 'Claim Summary',
     route: '/summary'
-  }
-  // ,
+  },
 
-  // {
-  //   icon: 'monitoring',
-  //   title: 'Observability',
-  //   route: '/observability'
-  // }
+  {
+    icon: 'monitoring',
+    title: 'Observability',
+    route: '/observability'
+  }
 
 ]);
 

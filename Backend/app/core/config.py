@@ -3,15 +3,22 @@ from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Resolve to the Backend/ directory:
+#   config.py  ->  core/  ->  app/  ->  Backend/
 BASE_DIR = Path(__file__).resolve().parents[2]
-# app/core/config.py -> app -> Backend
+
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=BASE_DIR / ".env",
+        case_sensitive=True,
+        extra="ignore",
+    )
+
     OPENAI_API_KEY: str
 
     OPENAI_MODEL: str = "gpt-5.5"
     OPENAI_FALLBACK_MODEL: str = "gpt-5.4-mini"
-
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-large"
 
     PINECONE_API_KEY: str
@@ -31,18 +38,10 @@ class Settings(BaseSettings):
         BASE_DIR.parent / "data" / "jobaids" / "nurse_prompts_interqual.xlsx"
     )
 
-    # model_config = SettingsConfigDict(
-    #     env_file=BASE_DIR / ".env",
-    #     extra="ignore",
-    # )
-
     @property
     def cors_origins_list(self) -> List[str]:
         """Split the comma-separated CORS_ORIGINS env var into a clean list."""
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
 settings = Settings()

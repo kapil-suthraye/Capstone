@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List
 
 from pinecone import Pinecone
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -49,7 +49,7 @@ class VectorStore:
         self,
         chunks: List[DocumentChunk],
         namespace: str,
-    ):
+    ) -> None:
 
         if not chunks:
             return
@@ -114,12 +114,12 @@ class VectorStore:
     ####################################################################
 
     async def similarity_search(
-    self,
-    query: str,
-    namespace: str,
-    diagnosis_tag: Optional[str] = None,
-    top_k: int = 20,
-):
+        self,
+        query: str,
+        namespace: str,
+        diagnosis_tag: str | None = None,
+        top_k: int = 20,
+    ) -> list:
 
         embedding = await self.embedder.embed(query)
 
@@ -155,16 +155,11 @@ class VectorStore:
     ####################################################################
 
     def rerank(
-
         self,
-
         query: str,
-
-        matches,
-
+        matches: list,
         top_n: int = 5,
-
-    ):
+    ) -> list:
 
         if not matches:
             return []
@@ -212,20 +207,13 @@ class VectorStore:
     ####################################################################
 
     async def retrieve(
-
         self,
-
         query: str,
-
         namespace: str,
-
-        diagnosis_tag=None,
-
-        top_k=50,
-
-        rerank_top_n=12,
-
-    ):
+        diagnosis_tag: str | None = None,
+        top_k: int = 50,
+        rerank_top_n: int = 12,
+    ) -> list[RetrievedChunk]:
 
         matches = await self.similarity_search(
 

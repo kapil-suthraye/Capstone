@@ -8,12 +8,39 @@
             <p>Select a criterion to evaluate against the uploaded medical record.</p>
         </div>
 
+        <!-- Diagnosis filter banner -->
+        @if(session.diagnosis()){
+            <div class="diagnosis-banner">
+                <div class="diagnosis-info">
+                    <span class="material-symbols-rounded">biotech</span>
+                    <div>
+                        <strong>Filtered by diagnosis</strong>
+                        <p>{{session.diagnosis()}}</p>
+                    </div>
+                </div>
+                <button type="button" class="show-all-btn" (click)="showAllPrompts()" title="Show all prompts">
+                    <span class="material-symbols-rounded">filter_list_off</span>
+                    Show all
+                </button>
+            </div>
+        }
+
         @if(!claimReady()){
             <div class="notice">
                 <span class="material-symbols-rounded">info</span>
                 Upload a medical record before running review.
             </div>
         }
+
+        <div class="prompt-count">
+            <span>{{prompts().length}} prompt{{prompts().length !== 1 ? 's' : ''}}</span>
+            @if(isFiltered() && session.diagnosis()){
+                <span class="filter-tag">
+                    <span class="material-symbols-rounded">filter_alt</span>
+                    {{session.diagnosis()}}
+                </span>
+            }
+        </div>
 
         <div class="prompt-list">
             @for(prompt of prompts(); track prompt.prompt_id){
@@ -25,14 +52,22 @@
                     [disabled]="loading()"
                     (click)="selectPrompt(prompt)">
 
-                    <span class="severity">{{prompt.severity_level || 'Clinical'}}</span>
-
-                    <!-- <strong>{{prompt.category}}</strong> -->
+                    <div class="prompt-meta">
+                        <span class="severity">{{prompt.severity_level || 'Clinical'}}</span>
+                        <span class="job-aid-tag">{{prompt.job_aid}}</span>
+                    </div>
 
                     <p>{{prompt.evaluation_prompt}}</p>
 
                 </button>
 
+            }
+
+            @if(prompts().length === 0 && !errorMessage()){
+                <div class="empty-prompts">
+                    <span class="material-symbols-rounded">search_off</span>
+                    <p>No prompts found for this diagnosis. <button type="button" class="link-btn" (click)="showAllPrompts()">Show all prompts</button></p>
+                </div>
             }
         </div>
 
@@ -43,11 +78,11 @@
         <div class="claim-strip">
             <div>
                 <p class="eyebrow">Selected claim</p>
-                <h1>{{session.filename || 'No medical record selected'}}</h1>
-                <p>{{session.documentId || 'Upload a record to create a claim namespace.'}}</p>
+                <h1>{{session.filename() || 'No medical record selected'}}</h1>
+                <p>{{session.documentId() || 'Upload a record to create a claim namespace.'}}</p>
             </div>
 
-            <a [routerLink]="['/summary', session.namespace]" class="summary-link" [class.disabled]="!claimReady()">
+            <a [routerLink]="['/summary', session.namespace()]" class="summary-link" [class.disabled]="!claimReady()">
                 <span class="material-symbols-rounded">summarize</span>
                 Final summary
             </a>

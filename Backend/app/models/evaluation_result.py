@@ -15,12 +15,19 @@ class SupportingEvidence(BaseModel):
 
 
 class RagasMetrics(BaseModel):
+    # These are deterministic term-overlap proxies, not the official RAGAS scores.
+    # Field names mirror RAGAS conventions so the schema stays compatible when the
+    # production RAGAS package is wired in.  Check `scoring_method` to distinguish.
+    scoring_method: str = "proxy"
     faithfulness: float | None = None
     answer_relevancy: float | None = None
     context_precision: float | None = None
     context_recall: float | None = None
     context_utilization: float | None = None
-    notes: str = "RAGAS-compatible metrics generated from retrieved context and reviewer output."
+    notes: str = (
+        "Proxy scores derived from term-overlap heuristics. "
+        "Wire the RAGAS package against ground-truth data for production scores."
+    )
 
 
 class EvaluationTelemetry(BaseModel):
